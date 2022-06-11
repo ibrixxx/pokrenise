@@ -1,20 +1,21 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import Navigation from "./navigation";
+import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
+import useCachedResources from "./hooks/useCachedResources";
+import {useColorScheme} from "react-native";
 
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-}
+  const isLoadingComplete = useCachedResources();
+  const colorScheme = useColorScheme()
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
+  if (!isLoadingComplete)
+    return null;
+  else
+    return (
+      <SafeAreaProvider>
+        <Navigation colorScheme={colorScheme}/>
+        <StatusBar />
+      </SafeAreaProvider>
+    );
+}
