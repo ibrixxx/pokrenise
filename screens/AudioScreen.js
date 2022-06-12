@@ -10,19 +10,25 @@ export default function AudioScreen({ navigation }) {
     const [currentSound, setSound] = useState(null)
 
     async function playSound() {
-        console.log('Loading Sound');
-        const { sound } = await Audio.Sound.createAsync({uri: 'https://ia800304.us.archive.org/34/items/PaulWhitemanwithMildredBailey/PaulWhitemanwithMildredBailey-AllofMe.mp3'});
-        await setSound(sound);
+        if(!currentSound) {
+            console.log('Loading Sound');
+            const {sound} = await Audio.Sound.createAsync(require('../assets/audio/masa.mp3'));
+            await setSound(sound);
 
-        console.log('Playing Sound');
-        await sound.playAsync();
-        await setIconName('pause')
+            console.log('Playing Sound');
+            await sound.playAsync();
+            await setIconName('pause')
+        }
+        else {
+            console.log('Playing Sound');
+            await currentSound.playAsync();
+            await setIconName('pause')
+        }
     }
 
     async function pauseSound() {
         console.log('Pause')
         await currentSound.pauseAsync()
-        await currentSound.unloadAsync();
         await setIconName('play')
     }
 
