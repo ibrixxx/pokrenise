@@ -9,7 +9,6 @@ import Colors from '../constants/Colors';
 
 export function useThemeColor(props, colorName) {
     const theme = useColorScheme();
-    console.log(theme)
     const colorFromProps = props[theme];
 
     if (colorFromProps) {
