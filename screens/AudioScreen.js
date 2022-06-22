@@ -1,4 +1,5 @@
-import {Pressable, StyleSheet} from 'react-native';
+import React from 'react';
+import {Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import { Text, View } from '../components/Themed';
 import {FontAwesome} from "@expo/vector-icons";
 import {Title} from "react-native-paper";
@@ -8,16 +9,18 @@ import useAxios from "axios-hooks";
 import {getAudio} from "../constants/API";
 
 export default function AudioScreen({ navigation }) {
-    const [iconName, setIconName] = useState('play')
-    const [soundPlayingUrl, setSoundPlayingUrl] = useState(null)
+    const [soundPlayingUrl, setSoundPlayingUrl] = useState([])
     const [sound, setSound] = useState(null)
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
     const [music, setMusic] = useState([])
     const [motivation, setMotivation] = useState([])
     const [podcasts, setPodcasts] = useState([])
+    const [refreshing, setRefreshing] = React.useState(false);
+
 
     useEffect(() => {
         if(data) {
+            console.log(data)
             let musicArr = []
             let motivationArr = []
             let podcastsArr = []
@@ -49,19 +52,19 @@ export default function AudioScreen({ navigation }) {
             }
         } else {
             if (playbackStatus.isPlaying) {
-                setIconName('pause')
-            } else {
-                setIconName('play')
+                console.log('play')
+            }
+            else {
+                console.log('pause')
             }
 
-            if (playbackStatus.isBuffering) {
-                // setIconName('music')
-            }
+            // if (playbackStatus.isBuffering) {
+            //     console.log('bufff')
+            // }
             if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
                 console.log('f')
                 setSound(null)
                 setSoundPlayingUrl(null)
-                setIconName('play')
             }
         }
     }
@@ -71,44 +74,46 @@ export default function AudioScreen({ navigation }) {
             console.log('Loading Sound');
             const { sound } = await Audio.Sound.createAsync({uri: url});
             await setSound(sound);
-            await setSoundPlayingUrl(url)
+            await setSoundPlayingUrl([url])
             await sound.setOnPlaybackStatusUpdate(audioStatusUpdate)
             console.log('Playing Sound');
             await sound.playAsync();
         }
-        else if(url && (url !== soundPlayingUrl)) {
+        else if((soundPlayingUrl.length === 2 && soundPlayingUrl[0] === '' && soundPlayingUrl[1] !== url) || (soundPlayingUrl.length === 1 && soundPlayingUrl[0] !== url) ) {
             await setSound(null)
             console.log('Loading Sound 2');
             const { sound } = await Audio.Sound.createAsync({uri: url});
             await setSound(sound);
-            await setSoundPlayingUrl(url)
+            await setSoundPlayingUrl([url])
             await sound.setOnPlaybackStatusUpdate(audioStatusUpdate)
             console.log('Playing Sound 3');
             await sound.playAsync();
         }
         else {
             console.log('Playing Sound 2');
+            await setSoundPlayingUrl([url])
             await sound.playAsync();
         }
     }
 
     async function pauseSound() {
         console.log('Pause')
+        await setSoundPlayingUrl(['', soundPlayingUrl[0]])
         await sound.pauseAsync()
     }
 
     const handleOnPress = url => {
-        if(url === soundPlayingUrl && iconName === 'pause')
+        if(url === soundPlayingUrl[0])
             return pauseSound()
-        else if(url === soundPlayingUrl && iconName === 'play')
-            return playSound(null)
+        else if(soundPlayingUrl[0] === '')
+            return playSound(url)
         else
             return playSound(url)
     }
 
     const handleAudioIcon = url => {
-        if(url === soundPlayingUrl)
-            return iconName
+        if(url === soundPlayingUrl[0])
+            return 'pause'
         else
             return 'play'
     }
@@ -117,65 +122,73 @@ export default function AudioScreen({ navigation }) {
     if (error) return <View style={styles.container}><Text>Error!</Text></View>
 
     return (
-        <View style={styles.container}>
-            {
-                music.map(m =>
-                    (
-                        <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                            <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                                <Title style={{color: 'white'}}>
-                                    Muzika
-                                </Title>
+            <ScrollView
+                contentContainerStyle={styles.container}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => {setRefreshing(true); refetch().then(() => setRefreshing(false))}}
+                    />
+                }
+            >
+                {
+                    music.map(m =>
+                        (
+                            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+                                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                                    <Title style={{color: 'white'}}>
+                                        Muzika
+                                    </Title>
+                                </View>
+                                <View style={styles.card}>
+                                    <Text>{m.title}</Text>
+                                    <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
+                                        <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
+                                    </Pressable>
+                                </View>
                             </View>
-                            <View style={styles.card}>
-                                <Text>{m.title}</Text>
-                                <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
-                                    <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
-                                </Pressable>
-                            </View>
-                        </View>
+                        )
                     )
-                )
-            }
-            {
-                motivation.map(m =>
-                    (
-                        <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                            <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                                <Title style={{color: 'white'}}>
-                                    Motivakcija
-                                </Title>
+                }
+                {
+                    motivation.map(m =>
+                        (
+                            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+                                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                                    <Title style={{color: 'white'}}>
+                                        Motivakcija
+                                    </Title>
+                                </View>
+                                <View style={styles.card}>
+                                    <Text>{m.title}</Text>
+                                    <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
+                                        <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
+                                    </Pressable>
+                                </View>
                             </View>
-                            <View style={styles.card}>
-                                <Text>{m.title}</Text>
-                                <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
-                                    <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
-                                </Pressable>
-                            </View>
-                        </View>
+                        )
                     )
-                )
-            }
-            {
-                podcasts.map(m =>
-                    (
-                        <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                            <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                                <Title style={{color: 'white'}}>
-                                    Podcasti
-                                </Title>
+                }
+                {
+                    podcasts.map(m =>
+                        (
+                            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+                                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                                    <Title style={{color: 'white'}}>
+                                        Podcasti
+                                    </Title>
+                                </View>
+                                <View style={styles.card}>
+                                    <Text>{m.title}</Text>
+                                    <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
+                                        <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
+                                    </Pressable>
+                                </View>
                             </View>
-                            <View style={styles.card}>
-                                <Text>{m.title}</Text>
-                                <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
-                                    <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
-                                </Pressable>
-                            </View>
-                        </View>
+                        )
                     )
-                )
-            }
-        </View>
+                }
+            </ScrollView>
     );
 }
 
@@ -184,6 +197,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
+        height: '100%'
     },
     card: {
         flexDirection: "row",
