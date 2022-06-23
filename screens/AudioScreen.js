@@ -1,5 +1,5 @@
 import React from 'react';
-import {Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {Image, ImageBackground, Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import { Text, View } from '../components/Themed';
 import {FontAwesome} from "@expo/vector-icons";
 import {Title} from "react-native-paper";
@@ -141,6 +141,7 @@ export default function AudioScreen({ navigation }) {
                                     </Title>
                                 </View>
                                 <View style={styles.card}>
+                                    <Image source={{uri: m.imageUrl}} style={{width: '20%', height: '100%', borderTopLeftRadius: 20, borderBottomLeftRadius: 20}}/>
                                     <Text>{m.title}</Text>
                                     <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
                                         <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
@@ -160,6 +161,7 @@ export default function AudioScreen({ navigation }) {
                                     </Title>
                                 </View>
                                 <View style={styles.card}>
+                                    <Image source={{uri: m.imageUrl}} style={{width: '20%', height: '100%', borderTopLeftRadius: 20, borderBottomLeftRadius: 20}}/>
                                     <Text>{m.title}</Text>
                                     <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
                                         <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
@@ -179,6 +181,7 @@ export default function AudioScreen({ navigation }) {
                                     </Title>
                                 </View>
                                 <View style={styles.card}>
+                                    <Image source={{uri: m.imageUrl}} style={{width: '20%', height: '100%', borderTopLeftRadius: 20, borderBottomLeftRadius: 20}}/>
                                     <Text>{m.title}</Text>
                                     <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
                                         <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
@@ -197,15 +200,13 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        height: '100%'
     },
     card: {
         flexDirection: "row",
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 10,
         backgroundColor: 'darkorange',
-        width: '90%',
+        width: '69%',
         height: '30%',
         elevation: 24,
         borderColor: 'gray',
