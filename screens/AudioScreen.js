@@ -1,5 +1,14 @@
 import React from 'react';
-import {Image, ImageBackground, Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {
+    Image,
+    ImageBackground,
+    Pressable,
+    RefreshControl,
+    SafeAreaView,
+    ScrollView,
+    SectionList,
+    StyleSheet
+} from 'react-native';
 import { Text, View } from '../components/Themed';
 import {FontAwesome} from "@expo/vector-icons";
 import {Title} from "react-native-paper";
@@ -7,6 +16,7 @@ import {useEffect, useState} from "react";
 import { Audio } from 'expo-av';
 import useAxios from "axios-hooks";
 import {getAudio} from "../constants/API";
+import AudioCard from "../components/AudioCard";
 
 export default function AudioScreen({ navigation }) {
     const [soundPlayingUrl, setSoundPlayingUrl] = useState([])
@@ -16,6 +26,7 @@ export default function AudioScreen({ navigation }) {
     const [motivation, setMotivation] = useState([])
     const [podcasts, setPodcasts] = useState([])
     const [refreshing, setRefreshing] = React.useState(false);
+    const [pom, setPom] = React.useState([]);
 
 
     useEffect(() => {
@@ -36,6 +47,7 @@ export default function AudioScreen({ navigation }) {
             setMusic(musicArr)
             setMotivation(motivationArr)
             setPodcasts(podcastsArr)
+            setPom([{title: 'Audio', data: data.result}])
         }
     }, [data])
 
@@ -122,76 +134,74 @@ export default function AudioScreen({ navigation }) {
     if (error) return <View style={styles.container}><Text>Error!</Text></View>
 
     return (
-            <ScrollView
-                contentContainerStyle={styles.container}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={() => {setRefreshing(true); refetch().then(() => setRefreshing(false))}}
+            // <ScrollView
+            //     contentContainerStyle={styles.container}
+            //     refreshControl={
+            //         <RefreshControl
+            //             refreshing={refreshing}
+            //             onRefresh={() => {setRefreshing(true); refetch().then(() => setRefreshing(false))}}
+            //         />
+            //     }
+            // >
+        <View style={styles.container}>
+                    <SectionList
+                        contentContainerStyle={{flexGrow: 1, height: '100%'}}
+                        sections={pom}
+                        keyExtractor={(item, index) => item._id + index}
+                        renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
+                        renderSectionHeader={({ section: { title } }) => (
+                            <View style={styles.sectionTitle}>
+                                <Title style={{color: 'white'}}>
+                                    {title}
+                                </Title>
+                            </View>
+                        )}
+                        scrollEnabled={true}
                     />
-                }
-            >
-                {
-                    music.map(m =>
-                        (
-                            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                                    <Title style={{color: 'white'}}>
-                                        Muzika
-                                    </Title>
-                                </View>
-                                <View style={styles.card}>
-                                    <Image source={{uri: m.imageUrl}} style={{width: '20%', height: '100%', borderTopLeftRadius: 20, borderBottomLeftRadius: 20}}/>
-                                    <Text>{m.title}</Text>
-                                    <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
-                                        <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
-                                    </Pressable>
-                                </View>
-                            </View>
-                        )
-                    )
-                }
-                {
-                    motivation.map(m =>
-                        (
-                            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                                    <Title style={{color: 'white'}}>
-                                        Motivakcija
-                                    </Title>
-                                </View>
-                                <View style={styles.card}>
-                                    <Image source={{uri: m.imageUrl}} style={{width: '20%', height: '100%', borderTopLeftRadius: 20, borderBottomLeftRadius: 20}}/>
-                                    <Text>{m.title}</Text>
-                                    <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
-                                        <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
-                                    </Pressable>
-                                </View>
-                            </View>
-                        )
-                    )
-                }
-                {
-                    podcasts.map(m =>
-                        (
-                            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                                    <Title style={{color: 'white'}}>
-                                        Podcasti
-                                    </Title>
-                                </View>
-                                <View style={styles.card}>
-                                    <Image source={{uri: m.imageUrl}} style={{width: '20%', height: '100%', borderTopLeftRadius: 20, borderBottomLeftRadius: 20}}/>
-                                    <Text>{m.title}</Text>
-                                    <Pressable onPress={() => handleOnPress(m.audioUrl)} style={{width: '10%', height: '100%', justifyContent: 'center'}}>
-                                        <FontAwesome name={handleAudioIcon(m.audioUrl)} color={'white'} size={14} />
-                                    </Pressable>
-                                </View>
-                            </View>
-                        )
-                    )
-                }
-            </ScrollView>
+        </View>
+            // </ScrollView>
+            //     {
+            //         music.map(m =>
+            //             (
+            //                 <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+            //                     <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+            //                         <Title style={{color: 'white'}}>
+            //                             Muzika
+            //                         </Title>
+            //                     </View>
+            //                     <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />
+            //                 </View>
+            //             )
+            //         )
+            //     }
+            //     {
+            //         motivation.map(m =>
+            //             (
+            //                 <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+            //                     <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+            //                         <Title style={{color: 'white'}}>
+            //                             Motivakcija
+            //                         </Title>
+            //                     </View>
+            //                     <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />
+            //                 </View>
+            //             )
+            //         )
+            //     }
+            //     {
+            //         podcasts.map(m =>
+            //             (
+            //                 <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+            //                     <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+            //                         <Title style={{color: 'white'}}>
+            //                             Podcasti
+            //                         </Title>
+            //                     </View>
+            //                     <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />
+            //                 </View>
+            //             )
+            //         )
+            //     }
     );
 }
 
@@ -201,22 +211,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    card: {
-        flexDirection: "row",
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        backgroundColor: 'darkorange',
-        width: '69%',
-        height: '30%',
-        elevation: 24,
-        borderColor: 'gray',
-        borderWidth: 2,
-        borderRadius: 20,
-        marginBottom: '5%',
-        shadowColor: 'white',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 1,
+    sectionTitle: {
+        width: '100%',
+        justifyContent: 'flex-start',
+        alignItems: 'flex-start',
+        paddingLeft: '5%'
     },
     title: {
         fontSize: 20,
