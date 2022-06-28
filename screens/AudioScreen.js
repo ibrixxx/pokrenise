@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+    FlatList,
     Image,
     ImageBackground,
     Pressable,
@@ -26,7 +27,6 @@ export default function AudioScreen({ navigation }) {
     const [motivation, setMotivation] = useState([])
     const [podcasts, setPodcasts] = useState([])
     const [refreshing, setRefreshing] = React.useState(false);
-    const [pom, setPom] = React.useState([]);
 
 
     useEffect(() => {
@@ -47,7 +47,6 @@ export default function AudioScreen({ navigation }) {
             setMusic(musicArr)
             setMotivation(motivationArr)
             setPodcasts(podcastsArr)
-            setPom([{title: 'Audio', data: data.result}])
         }
     }, [data])
 
@@ -133,83 +132,111 @@ export default function AudioScreen({ navigation }) {
     if (loading) return <View style={styles.container}><Text>Loading...</Text></View>
     if (error) return <View style={styles.container}><Text>Error!</Text></View>
 
+    const logo = {
+        uri: 'https://reactnative.dev/img/tiny_logo.png',
+        width: 64,
+        height: 64
+    };
+
     return (
-            // <ScrollView
-            //     contentContainerStyle={styles.container}
-            //     refreshControl={
-            //         <RefreshControl
-            //             refreshing={refreshing}
-            //             onRefresh={() => {setRefreshing(true); refetch().then(() => setRefreshing(false))}}
-            //         />
-            //     }
-            // >
-        <View style={styles.container}>
-                    <SectionList
-                        contentContainerStyle={{flexGrow: 1, height: '100%'}}
-                        sections={pom}
-                        keyExtractor={(item, index) => item._id + index}
-                        renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
-                        renderSectionHeader={({ section: { title } }) => (
-                            <View style={styles.sectionTitle}>
-                                <Title style={{color: 'white'}}>
-                                    {title}
-                                </Title>
-                            </View>
-                        )}
-                        scrollEnabled={true}
+            <ScrollView
+                contentContainerStyle={styles.container}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={() => {setRefreshing(true); refetch().then(() => setRefreshing(false))}}
                     />
-        </View>
-            // </ScrollView>
-            //     {
-            //         music.map(m =>
-            //             (
-            //                 <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-            //                     <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-            //                         <Title style={{color: 'white'}}>
-            //                             Muzika
-            //                         </Title>
-            //                     </View>
-            //                     <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />
-            //                 </View>
-            //             )
-            //         )
-            //     }
-            //     {
-            //         motivation.map(m =>
-            //             (
-            //                 <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-            //                     <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-            //                         <Title style={{color: 'white'}}>
-            //                             Motivakcija
-            //                         </Title>
-            //                     </View>
-            //                     <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />
-            //                 </View>
-            //             )
-            //         )
-            //     }
-            //     {
-            //         podcasts.map(m =>
-            //             (
-            //                 <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-            //                     <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-            //                         <Title style={{color: 'white'}}>
-            //                             Podcasti
-            //                         </Title>
-            //                     </View>
-            //                     <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />
-            //                 </View>
-            //             )
-            //         )
-            //     }
+                }
+            >
+                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                    <Title style={{color: 'white'}}>
+                        Motivakcija
+                    </Title>
+                </View>
+                <FlatList
+                    horizontal={true}
+                    data={data.result}
+                    renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
+                    keyExtractor={item => item._id}
+                    ListEmptyComponent={() => <Text>Nema podataka</Text>}
+                />
+
+                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                    <Title style={{color: 'white'}}>
+                        Muzika
+                    </Title>
+                </View>
+                <FlatList
+                    horizontal={true}
+                    data={data.result}
+                    renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
+                    keyExtractor={item => item._id}
+                    ListEmptyComponent={() => <Text>Nema podataka</Text>}
+                />
+
+                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                    <Title style={{color: 'white'}}>
+                        Podcasti
+                    </Title>
+                </View>
+                <FlatList
+                    horizontal={true}
+                    data={data.result}
+                    renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
+                    keyExtractor={item => item._id}
+                    ListEmptyComponent={() => <Text>Nema podataka</Text>}
+                />
+
+
+                {/* {*/}
+                {/*    music.map(m =>*/}
+                {/*        (*/}
+                {/*            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>*/}
+                {/*                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>*/}
+                {/*                    <Title style={{color: 'white'}}>*/}
+                {/*                        Muzika*/}
+                {/*                    </Title>*/}
+                {/*                </View>*/}
+                {/*                <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />*/}
+                {/*            </View>*/}
+                {/*        )*/}
+                {/*    )*/}
+                {/*}*/}
+                {/*{*/}
+                {/*    motivation.map(m =>*/}
+                {/*        (*/}
+                {/*            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>*/}
+                {/*                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>*/}
+                {/*                    <Title style={{color: 'white'}}>*/}
+                {/*                        Motivakcija*/}
+                {/*                    </Title>*/}
+                {/*                </View>*/}
+                {/*                <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />*/}
+                {/*            </View>*/}
+                {/*        )*/}
+                {/*    )*/}
+                {/*}*/}
+                {/*{*/}
+                {/*    podcasts.map(m =>*/}
+                {/*        (*/}
+                {/*            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>*/}
+                {/*                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>*/}
+                {/*                    <Title style={{color: 'white'}}>*/}
+                {/*                        Podcasti*/}
+                {/*                    </Title>*/}
+                {/*                </View>*/}
+                {/*                <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />*/}
+                {/*            </View>*/}
+                {/*        )*/}
+                {/*    )*/}
+                {/*}*/}
+                </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexGrow: 1,
     },
     sectionTitle: {
         width: '100%',
