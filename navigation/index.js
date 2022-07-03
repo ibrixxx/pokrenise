@@ -31,7 +31,7 @@ function RootNavigator() {
         <Stack.Navigator>
             <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false, contentStyle: {backgroundColor: 'black'}}} />
             <Stack.Screen name="NotFound" component={CommunityScreen} options={{ title: 'Oops!' }} />
-            <Stack.Group screenOptions={{ presentation: 'modal' }}>
+            <Stack.Group screenOptions={{ presentation: 'modal', headerShown: false }}>
                 <Stack.Screen name="AudioPlayer" component={AudioPlayer} />
             </Stack.Group>
         </Stack.Navigator>

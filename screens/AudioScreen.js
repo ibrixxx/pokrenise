@@ -118,10 +118,14 @@ export default function AudioScreen({ navigation }) {
     const handleOnPress = url => {
         if(url === soundPlayingUrl[0])
             return pauseSound()
-        else if(soundPlayingUrl[0] === '')
+        else if(soundPlayingUrl[0] === '') {
+            navigation.navigate('AudioPlayer')
             return playSound(url)
-        else
+        }
+        else {
+            navigation.navigate('AudioPlayer')
             return playSound(url)
+        }
     }
 
     const handleAudioIcon = url => {
@@ -153,6 +157,7 @@ export default function AudioScreen({ navigation }) {
                 <FlatList
                     horizontal={true}
                     data={data.result}
+                    showsHorizontalScrollIndicator={false}
                     renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
@@ -166,6 +171,7 @@ export default function AudioScreen({ navigation }) {
                 <FlatList
                     horizontal={true}
                     data={data.result}
+                    showsHorizontalScrollIndicator={false}
                     renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
@@ -179,6 +185,7 @@ export default function AudioScreen({ navigation }) {
                 <FlatList
                     horizontal={true}
                     data={data.result}
+                    showsHorizontalScrollIndicator={false}
                     renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
