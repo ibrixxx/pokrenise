@@ -1,11 +1,11 @@
 import {StyleSheet} from 'react-native';
 import {Text, View} from "../components/Themed";
 
-export default function ComunityScreen() {
+export default function AudioPlayer() {
     return (
         <View style={styles.container}>
             <Text style={{padding: '5%'}}>
-                Koraci
+                Chat
             </Text>
         </View>
     )

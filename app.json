@@ -7,9 +7,9 @@
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/PokreniSe.png",
+      "image": "./assets/images/mot.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#1A293D"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

@@ -18,6 +18,8 @@ import { Audio } from 'expo-av';
 import useAxios from "axios-hooks";
 import {getAudio} from "../constants/API";
 import AudioCard from "../components/AudioCard";
+import {scale} from "react-native-size-matters";
+import Colors from "../constants/Colors";
 
 export default function AudioScreen({ navigation }) {
     const [soundPlayingUrl, setSoundPlayingUrl] = useState([])
@@ -61,14 +63,14 @@ export default function AudioScreen({ navigation }) {
             if (playbackStatus.error) {
                 console.log(`Encountered a fatal error during playback: ${playbackStatus.error}`);
             }
-        } else {
+        }
+        else {
             if (playbackStatus.isPlaying) {
                 console.log('play')
             }
             else {
                 console.log('pause')
             }
-
             // if (playbackStatus.isBuffering) {
             //     console.log('bufff')
             // }
@@ -132,13 +134,8 @@ export default function AudioScreen({ navigation }) {
     if (loading) return <View style={styles.container}><Text>Loading...</Text></View>
     if (error) return <View style={styles.container}><Text>Error!</Text></View>
 
-    const logo = {
-        uri: 'https://reactnative.dev/img/tiny_logo.png',
-        width: 64,
-        height: 64
-    };
-
     return (
+        <SafeAreaView style={{flex: 1, paddingTop: scale(30), backgroundColor: Colors['dark'].background}}>
             <ScrollView
                 contentContainerStyle={styles.container}
                 refreshControl={
@@ -186,51 +183,8 @@ export default function AudioScreen({ navigation }) {
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
-
-
-                {/* {*/}
-                {/*    music.map(m =>*/}
-                {/*        (*/}
-                {/*            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>*/}
-                {/*                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>*/}
-                {/*                    <Title style={{color: 'white'}}>*/}
-                {/*                        Muzika*/}
-                {/*                    </Title>*/}
-                {/*                </View>*/}
-                {/*                <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />*/}
-                {/*            </View>*/}
-                {/*        )*/}
-                {/*    )*/}
-                {/*}*/}
-                {/*{*/}
-                {/*    motivation.map(m =>*/}
-                {/*        (*/}
-                {/*            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>*/}
-                {/*                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>*/}
-                {/*                    <Title style={{color: 'white'}}>*/}
-                {/*                        Motivakcija*/}
-                {/*                    </Title>*/}
-                {/*                </View>*/}
-                {/*                <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />*/}
-                {/*            </View>*/}
-                {/*        )*/}
-                {/*    )*/}
-                {/*}*/}
-                {/*{*/}
-                {/*    podcasts.map(m =>*/}
-                {/*        (*/}
-                {/*            <View key={m._id} style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>*/}
-                {/*                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>*/}
-                {/*                    <Title style={{color: 'white'}}>*/}
-                {/*                        Podcasti*/}
-                {/*                    </Title>*/}
-                {/*                </View>*/}
-                {/*                <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={m} />*/}
-                {/*            </View>*/}
-                {/*        )*/}
-                {/*    )*/}
-                {/*}*/}
-                </ScrollView>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 

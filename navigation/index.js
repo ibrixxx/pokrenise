@@ -3,11 +3,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
-import {Pressable, useColorScheme} from 'react-native';
+import {useColorScheme} from 'react-native';
 import Colors from '../constants/Colors';
-import ComunityScreen from "../screens/ComunityScreen";
-import ChatScreen from "../screens/ChatScreen";
-import FeedScreen from "../screens/FeedScreen";
+import CommunityScreen from "../screens/CommunityScreen";
+import AudioPlayer from "../screens/AudioPlayer";
 import AudioScreen from "../screens/AudioScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 
@@ -30,10 +29,10 @@ const Stack = createNativeStackNavigator();
 function RootNavigator() {
     return (
         <Stack.Navigator>
-            <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
-            <Stack.Screen name="NotFound" component={ComunityScreen} options={{ title: 'Oops!' }} />
+            <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false, contentStyle: {backgroundColor: 'black'}}} />
+            <Stack.Screen name="NotFound" component={CommunityScreen} options={{ title: 'Oops!' }} />
             <Stack.Group screenOptions={{ presentation: 'modal' }}>
-                <Stack.Screen name="Profile" component={ProfileScreen} />
+                <Stack.Screen name="AudioPlayer" component={AudioPlayer} />
             </Stack.Group>
         </Stack.Navigator>
     );
@@ -53,56 +52,39 @@ function BottomTabNavigator() {
             initialRouteName="Audio"
             sceneContainerStyle={{marginBottom: 10}}
             screenOptions={{
-                tabBarActiveTintColor: Colors[colorScheme].tint
-            }}>
+                tabBarActiveTintColor: Colors[colorScheme].tabIconSelected,
+                tabBarInactiveTintColor: Colors[colorScheme].tabIconDefault,
+                headerShown: false,
+                tabBarStyle: {
+                    backgroundColor: Colors[colorScheme].tabColor
+                }
+            }}
+        >
             <BottomTab.Screen
                 name="Audio"
                 component={AudioScreen}
-                options={({ navigation }) => ({
+                options={{
+                    tabBarLabel: () => null,
                     tabBarItemStyle: {paddingBottom: 5},
-                    title: 'Audio',
                     tabBarIcon: ({ color }) => <TabBarIcon name="play" color={color} />,
-                    headerRight: () => (
-                        <Pressable
-                            onPress={() => navigation.navigate('Profile')}
-                            style={({ pressed }) => ({
-                                opacity: pressed ? 0.5 : 1,
-                            })}>
-                            <FontAwesome
-                                name="user"
-                                size={25}
-                                color={Colors[colorScheme].text}
-                                style={{ marginRight: 15 }}
-                            />
-                        </Pressable>
-                    ),
-                })}
-            />
-            <BottomTab.Screen
-                name="Feed"
-                component={FeedScreen}
-                options={{
-                    title: 'Feed',
-                    tabBarItemStyle: {paddingBottom: 5},
-                    tabBarIcon: ({ color }) => <TabBarIcon name="newspaper-o" color={color} />,
                 }}
             />
             <BottomTab.Screen
-                name="Chat"
-                component={ChatScreen}
+                name="Community"
+                component={CommunityScreen}
                 options={{
-                    title: 'Chat',
+                    tabBarLabel: () => null,
                     tabBarItemStyle: {paddingBottom: 5},
-                    tabBarIcon: ({ color }) => <TabBarIcon name="commenting-o" color={color} />,
+                    tabBarIcon: ({ color }) => <TabBarIcon name="trophy" color={color} size={27}/>,
                 }}
             />
             <BottomTab.Screen
-                name="Comunity"
-                component={ComunityScreen}
+                name="Profile"
+                component={ProfileScreen}
                 options={{
-                    title: 'Comunity',
+                    tabBarLabel: () => null,
                     tabBarItemStyle: {paddingBottom: 5},
-                    tabBarIcon: ({ color }) => <TabBarIcon name="group" color={color} />,
+                    tabBarIcon: ({ color }) => <TabBarIcon name="user" color={color} size={27}/>,
                 }}
             />
         </BottomTab.Navigator>
@@ -113,5 +95,5 @@ function BottomTabNavigator() {
  * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
  */
 function TabBarIcon( props ) {
-    return <FontAwesome size={20} style={{ marginBottom: 1 }} {...props} />;
+    return <FontAwesome size={25} style={{ marginBottom: 1 }} {...props} />;
 }

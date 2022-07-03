@@ -1,16 +1,19 @@
 import React from "react";
-import {Image, Pressable, StyleSheet} from "react-native";
+import {Image, Pressable, StyleSheet, useColorScheme} from "react-native";
 import {Text, View} from "./Themed";
 import {FontAwesome} from "@expo/vector-icons";
 import { scale, verticalScale, moderateScale } from 'react-native-size-matters'
+import Colors from "../constants/Colors";
 
 const AudioCard = ({
     handleOnPress,
     handleAudioIcon,
     m,
 }) => {
+    const theme = useColorScheme();
+
     return (
-        <View style={styles.card}>
+        <View style={[styles.card, {backgroundColor: Colors[theme].primary}]}>
             <Image resizeMode={'stretch'} source={{uri: m.imageUrl}} style={styles.image}/>
             <Text style={styles.title}>{m.title}</Text>
             <Pressable onPress={() => handleOnPress(m.audioUrl)} style={styles.pressable}>
@@ -25,7 +28,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'darkorange',
         width: scale(250),
         height: verticalScale(100),
         elevation: 24,
