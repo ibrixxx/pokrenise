@@ -1,7 +1,8 @@
 {
   "expo": {
-    "name": "pokrenise",
-    "slug": "pokrenise",
+    "name": "motivakcija",
+    "slug": "motivakcija",
+    "owner": "ibrahimmesan",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -18,13 +19,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ibrahimmesan.motivakcija"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.ibrahimmesan.motivakcija"
     },
     "web": {
       "favicon": "./assets/favicon.png"

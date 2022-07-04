@@ -119,11 +119,11 @@ export default function AudioScreen({ navigation }) {
         if(url === soundPlayingUrl[0])
             return pauseSound()
         else if(soundPlayingUrl[0] === '') {
-            navigation.navigate('AudioPlayer')
+            navigation.navigate('AudioPlayer', {img: "https://cdn.sanity.io/images/ti4bwp8r/production/72bd47676b76b4a1265b1d893b4db9bf8db6ef8b-1241x1239.jpg", iconName: handleAudioIcon(url)})
             return playSound(url)
         }
         else {
-            navigation.navigate('AudioPlayer')
+            navigation.navigate('AudioPlayer', {img: "https://cdn.sanity.io/images/ti4bwp8r/production/72bd47676b76b4a1265b1d893b4db9bf8db6ef8b-1241x1239.jpg", iconName: handleAudioIcon(url)})
             return playSound(url)
         }
     }
