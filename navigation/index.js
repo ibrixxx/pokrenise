@@ -6,7 +6,7 @@ import * as React from 'react';
 import {useColorScheme} from 'react-native';
 import Colors from '../constants/Colors';
 import CommunityScreen from "../screens/CommunityScreen";
-import AudioPlayer from "../screens/AudioPlayer";
+import AudioPlayerScreen from "../screens/AudioPlayerScreen";
 import AudioScreen from "../screens/AudioScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 
@@ -32,7 +32,7 @@ function RootNavigator() {
             <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false, contentStyle: {backgroundColor: 'black'}}} />
             <Stack.Screen name="NotFound" component={CommunityScreen} options={{ title: 'Oops!' }} />
             <Stack.Group screenOptions={{ presentation: 'modal', headerShown: false }}>
-                <Stack.Screen name="AudioPlayer" component={AudioPlayer} />
+                <Stack.Screen name="AudioPlayer" component={AudioPlayerScreen} />
             </Stack.Group>
         </Stack.Navigator>
     );

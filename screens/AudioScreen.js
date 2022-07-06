@@ -158,7 +158,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={data.result}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard soundPlayingUrl handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
@@ -172,7 +172,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={data.result}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard soundPlayingUrl handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
@@ -186,7 +186,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={data.result}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleAudioIcon={handleAudioIcon} handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard soundPlayingUrl handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />

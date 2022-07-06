@@ -7,10 +7,17 @@ import Colors from "../constants/Colors";
 
 const AudioCard = ({
     handleOnPress,
-    handleAudioIcon,
+    soundPlayingUrl,
     m,
 }) => {
     const theme = useColorScheme();
+
+    const handleAudioIcon = url => {
+        if(url === soundPlayingUrl[0])
+            return 'pause'
+        else
+            return 'play'
+    }
 
     return (
         <View style={[styles.card, {backgroundColor: Colors[theme].primary}]}>
