@@ -1,26 +1,72 @@
-import {Image, Pressable, StyleSheet, useColorScheme} from 'react-native';
+import {Image, Pressable, ScrollView, StyleSheet, useColorScheme} from 'react-native';
 import {Text, View} from "../components/Themed";
-import {AntDesign, FontAwesome, MaterialIcons, SimpleLineIcons} from '@expo/vector-icons';
+import {AntDesign, Entypo, FontAwesome, MaterialIcons, SimpleLineIcons} from '@expo/vector-icons';
 import {scale, verticalScale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TextTicker from 'react-native-text-ticker'
 import Slider from '@react-native-community/slider';
 import {useNavigation} from "@react-navigation/native";
+import {useEffect, useState} from "react";
+import {currentPlaybackOption, currentAudioObject, currentAudioInstance, currentStatus} from "../atoms/AudioFunctions";
+import {useRecoilState, useRecoilValue} from "recoil";
+import {playbackOptions} from "../utils/playbackOptions";
+import {onPlay} from "../utils/AudioPlayer";
+
 
 export default function AudioPlayerScreen({route}) {
     const theme = useColorScheme()
-    const {img, iconName} = route.params
     const navigation = useNavigation()
+    const { soundItem } = route.params
 
-    const hendlePlaybackIcon = () => {
-        // <SimpleLineIcons name="loop" size={24} color={Colors[theme].tabIconDefault} />
-        // <MaterialIcons name="sync-alt" size={24} color={Colors[theme].tabIconDefault} />
-        return <MaterialIcons name="sync-disabled" size={24} color={Colors[theme].tabIconDefault} />
+    const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
+    const currAudioObject = useRecoilValue(currentAudioObject)
+    const [currAudioInstance, setCurrAudioInstance] = useRecoilState(currentAudioInstance)
+    const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
+
+    const [liked, setLiked] = useState(false)
+    const [speed, setSpeed] = useState(1.0)
+    const [desc, setDesc] = useState(false)
+
+    const togglePlaybackIcon = plbck => {
+        setCurrPlaybackOption(playbackOptions[plbck])
     }
+
+    const togglePlaybackSpeed = () => {
+        if(speed !== 1.75)
+            setSpeed((speed + 0.25) % 2)
+        else
+            setSpeed(speed + 0.25)
+    }
+
+    const toggleDesc = val => {
+        setDesc(val)
+    }
+
+    const onPlayButton = () => {
+        onPlay(currAudioInstance, setCurrAudioInstance, currAudioObject, soundItem, currStatus, setCurrStatus)
+    }
+
+
+    const showPlaybackIcon = () => {
+        if(currPlaybackOption === playbackOptions[0])
+            return <MaterialIcons onPress={() => togglePlaybackIcon(1)} name="sync-alt" size={24} color={Colors[theme].tabIconDefault} />
+        else if(currPlaybackOption === playbackOptions[2])
+            return <MaterialIcons onPress={() => togglePlaybackIcon(0)} name="sync-disabled" size={24} color={Colors[theme].tabIconDefault} />
+        else
+            return <SimpleLineIcons onPress={() => togglePlaybackIcon(2)} name="loop" size={24} color={Colors[theme].tabIconDefault} />
+
+    }
+
+    // useEffect(()=>{
+    //     return sound ? () => {
+    //             sound.unloadAsync(); }
+    //         : undefined;
+    // },[sound])
+
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
+             <View style={styles.header}>
                 <AntDesign name="down" onPress={() => navigation.goBack()} size={24} color={Colors[theme].tabIconDefault} />
                 <View style={{flexDirection: 'row'}}>
                     <AntDesign name="download" size={24} style={{paddingRight: scale(10)}} color={Colors[theme].primary} />
@@ -36,19 +82,30 @@ export default function AudioPlayerScreen({route}) {
                     marqueeDelay={1000}
                     scrollSpeed={14}
                 >
-                    Super long piece sdsafds gdfg dg f gdfhfh
+                    {soundItem.title}
                 </TextTicker>
             </View>
-            <Pressable style={styles.audioImage}>
-                <Image source={{uri: img}} style={{width: '90%', height: '100%'}} />
+            <Pressable onPress={() => toggleDesc(true)} disabled={desc} style={styles.audioImage}>
+                <Image source={{uri: soundItem.imageUrl}} style={{width: '90%', height: '100%'}} />
+                {
+                    desc &&
+                    <ScrollView style={styles.scrollViewDesc} contentContainerStyle={styles.scrollViewContent}>
+                        <Text style={styles.desc}>{soundItem.description}</Text>
+                    </ScrollView>
+                }
+                {
+                    desc && <AntDesign onPress={() => toggleDesc(false)} name="closesquareo" size={19} color="white" style={{position: 'absolute', right: scale(20), bottom: verticalScale(5), opacity: 0.75}} />
+                }
             </Pressable>
             <View style={styles.footer}>
-                <View style={{paddingTop: verticalScale(4), alignItems: 'center'}}>
+                <Pressable onPress={togglePlaybackSpeed} style={{paddingTop: verticalScale(4), alignItems: 'center', width: scale(30)}}>
                     <MaterialCommunityIcons name="play-speed" size={24} color={Colors[theme].tabIconDefault} />
-                    <Text style={{color: Colors[theme].tabIconDefault, fontSize: 11}}>1.0x</Text>
-                </View>
-                <AntDesign name="hearto" size={24} color={Colors[theme].tabIconDefault} />
-                <MaterialIcons name="sync-disabled" size={24} color={Colors[theme].tabIconDefault} />
+                    <Text style={{color: Colors[theme].tabIconDefault, fontSize: 11}}>{speed.toString()}x</Text>
+                </Pressable>
+                <AntDesign onPress={() => setLiked(!liked)} name={liked? "heart":"hearto"} size={24} color={liked? Colors[theme].primary:Colors[theme].tabIconDefault} />
+                {
+                    showPlaybackIcon()
+                }
             </View>
             <View style={{flex: 0.5, width: '90%'}}>
                 <Slider
@@ -62,8 +119,8 @@ export default function AudioPlayerScreen({route}) {
             <View style={styles.footer}>
                 <MaterialCommunityIcons name="rewind-15" size={24} color={Colors[theme].tabIconDefault} />
                 <MaterialCommunityIcons name="skip-previous" size={33} color={Colors[theme].primary} />
-                <Pressable style={[styles.buttonPlay, {backgroundColor: Colors[theme].primary}]}>
-                    <FontAwesome name={iconName} color={'black'} size={24} />
+                <Pressable onPress={onPlayButton} style={[styles.buttonPlay, {backgroundColor: Colors[theme].primary}]}>
+                    <Entypo name={currStatus?.isPlaying? "controller-paus":"controller-play"} size={30} color="black" />
                 </Pressable>
                 <MaterialCommunityIcons name="skip-next" size={33} color={Colors[theme].primary} />
                 <MaterialCommunityIcons name="fast-forward-15" size={24} color={Colors[theme].tabIconDefault} />
@@ -119,4 +176,21 @@ const styles = StyleSheet.create({
         height: 1,
         width: '80%',
     },
+    scrollViewDesc: {
+        position: 'absolute',
+        backgroundColor: 'black',
+        width: '90%',
+        height: '100%',
+        opacity: 0.75
+    },
+    scrollViewContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexGrow: 1,
+        padding: scale(30),
+        opacity: 1
+    },
+    desc: {
+        fontStyle: 'italic', fontSize: 14, opacity: 1
+    }
 });

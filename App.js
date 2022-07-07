@@ -4,6 +4,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaCon
 import useCachedResources from "./hooks/useCachedResources";
 import {useColorScheme} from "react-native";
 import ContextProvider from "./context/AppContext";
+import {RecoilRoot} from "recoil";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
@@ -16,9 +17,11 @@ export default function App() {
     return (
       <SafeAreaProvider>
         <StatusBar />
-        <ContextProvider>
-            <Navigation colorScheme={colorScheme}/>
-        </ContextProvider>
+        <RecoilRoot>
+            <ContextProvider>
+                <Navigation colorScheme={colorScheme}/>
+            </ContextProvider>
+        </RecoilRoot>
       </SafeAreaProvider>
     );
 }

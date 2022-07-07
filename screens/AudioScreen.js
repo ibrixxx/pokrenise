@@ -20,15 +20,16 @@ import {getAudio} from "../constants/API";
 import AudioCard from "../components/AudioCard";
 import {scale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
+import {useRecoilState} from "recoil";
+import {currentAudioObject} from "../atoms/AudioFunctions";
 
 export default function AudioScreen({ navigation }) {
-    const [soundPlayingUrl, setSoundPlayingUrl] = useState([])
-    const [sound, setSound] = useState(null)
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
     const [music, setMusic] = useState([])
     const [motivation, setMotivation] = useState([])
     const [podcasts, setPodcasts] = useState([])
     const [refreshing, setRefreshing] = React.useState(false);
+    const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
 
 
     useEffect(() => {
@@ -52,87 +53,9 @@ export default function AudioScreen({ navigation }) {
         }
     }, [data])
 
-    useEffect(()=>{
-        return sound ? () => {
-                sound.unloadAsync(); }
-            : undefined;
-    },[sound])
-
-    const audioStatusUpdate = playbackStatus => {
-        if (!playbackStatus.isLoaded) {
-            if (playbackStatus.error) {
-                console.log(`Encountered a fatal error during playback: ${playbackStatus.error}`);
-            }
-        }
-        else {
-            if (playbackStatus.isPlaying) {
-                console.log('play')
-            }
-            else {
-                console.log('pause')
-            }
-            // if (playbackStatus.isBuffering) {
-            //     console.log('bufff')
-            // }
-            if (playbackStatus.didJustFinish && !playbackStatus.isLooping) {
-                console.log('f')
-                setSound(null)
-                setSoundPlayingUrl(null)
-            }
-        }
-    }
-
-    async function playSound(url) {
-        if(!sound && url) {
-            console.log('Loading Sound');
-            const { sound } = await Audio.Sound.createAsync({uri: url});
-            await setSound(sound);
-            await setSoundPlayingUrl([url])
-            await sound.setOnPlaybackStatusUpdate(audioStatusUpdate)
-            console.log('Playing Sound');
-            await sound.playAsync();
-        }
-        else if((soundPlayingUrl.length === 2 && soundPlayingUrl[0] === '' && soundPlayingUrl[1] !== url) || (soundPlayingUrl.length === 1 && soundPlayingUrl[0] !== url) ) {
-            await setSound(null)
-            console.log('Loading Sound 2');
-            const { sound } = await Audio.Sound.createAsync({uri: url});
-            await setSound(sound);
-            await setSoundPlayingUrl([url])
-            await sound.setOnPlaybackStatusUpdate(audioStatusUpdate)
-            console.log('Playing Sound 3');
-            await sound.playAsync();
-        }
-        else {
-            console.log('Playing Sound 2');
-            await setSoundPlayingUrl([url])
-            await sound.playAsync();
-        }
-    }
-
-    async function pauseSound() {
-        console.log('Pause')
-        await setSoundPlayingUrl(['', soundPlayingUrl[0]])
-        await sound.pauseAsync()
-    }
-
-    const handleOnPress = url => {
-        if(url === soundPlayingUrl[0])
-            return pauseSound()
-        else if(soundPlayingUrl[0] === '') {
-            navigation.navigate('AudioPlayer', {img: "https://cdn.sanity.io/images/ti4bwp8r/production/72bd47676b76b4a1265b1d893b4db9bf8db6ef8b-1241x1239.jpg", iconName: handleAudioIcon(url)})
-            return playSound(url)
-        }
-        else {
-            navigation.navigate('AudioPlayer', {img: "https://cdn.sanity.io/images/ti4bwp8r/production/72bd47676b76b4a1265b1d893b4db9bf8db6ef8b-1241x1239.jpg", iconName: handleAudioIcon(url)})
-            return playSound(url)
-        }
-    }
-
-    const handleAudioIcon = url => {
-        if(url === soundPlayingUrl[0])
-            return 'pause'
-        else
-            return 'play'
+    const handleOnPress = sound => {
+        setCurrAudioObject(sound)
+        navigation.navigate('AudioPlayer', {soundItem: sound})
     }
 
     if (loading) return <View style={styles.container}><Text>Loading...</Text></View>
@@ -158,7 +81,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={data.result}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard soundPlayingUrl handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
@@ -172,7 +95,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={data.result}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard soundPlayingUrl handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
@@ -186,7 +109,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={data.result}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard soundPlayingUrl handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} />}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
