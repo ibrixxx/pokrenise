@@ -21,7 +21,8 @@ import AudioCard from "../components/AudioCard";
 import {scale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import {useRecoilState} from "recoil";
-import {currentAudioObject} from "../atoms/AudioFunctions";
+import {currentAudioInstance, currentAudioObject, currentStatus} from "../atoms/AudioFunctions";
+import {loadPlaybackInstance} from "../utils/AudioPlayer";
 
 export default function AudioScreen({ navigation }) {
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
@@ -29,12 +30,15 @@ export default function AudioScreen({ navigation }) {
     const [motivation, setMotivation] = useState([])
     const [podcasts, setPodcasts] = useState([])
     const [refreshing, setRefreshing] = React.useState(false);
+
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
+    const [currAudioInstance, setCurrAudioInstance] = useRecoilState(currentAudioInstance)
+    const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
+
 
 
     useEffect(() => {
         if(data) {
-            console.log(data)
             let musicArr = []
             let motivationArr = []
             let podcastsArr = []
@@ -55,6 +59,7 @@ export default function AudioScreen({ navigation }) {
 
     const handleOnPress = sound => {
         setCurrAudioObject(sound)
+        loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
         navigation.navigate('AudioPlayer', {soundItem: sound})
     }
 

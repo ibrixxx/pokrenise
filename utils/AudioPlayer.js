@@ -1,33 +1,46 @@
 import {Audio} from "expo-av";
 
-export const onPlay = async (audioInstance, setAudioInstance, audioObj, soundItem, currStatus, setStatus) => {
-    if(!audioInstance) {
-        try {
-            const {soundObject} = await Audio.Sound.createAsync({uri: audioObj.audioUrl}, {shouldPlay: true})
-            await setAudioInstance(soundObject)
-            await setStatus(soundObject)
-            await soundObject.playAsync()
-        }
-        catch (e){
-            console.log(e)
+const onPlaybackStatusUpdate = (status, setStatus) => {
+    console.log('s1 ', status)
+    if(status.isLoaded) {
+        setStatus(status)
+        if(status.didJustFinish && !status.isLooping) {
+            //play currentPlaybackOption
         }
     }
-    else if(currStatus.isLoaded && currStatus.isPlaying) {
-        try {
-            const status = await audioInstance.setStatusAsync({shouldPlay: false})
-            await setStatus(status)
+    else
+        if(status.error) {
+            console.log('FATAL ERROR ' + status.error)
         }
-        catch (e) {
-            console.log(e)
-        }
+}
+
+export const loadPlaybackInstance = async (audioInstance, setAudioInstance, audioObj, shouldPlay, setStatus) => {
+    if(audioInstance !== null) {
+        await audioInstance.unloadAsync()
+        setAudioInstance(null)
     }
-    else if(currStatus.isLoaded && !currStatus.isPlaying && audioObj.audioUrl === soundItem.audioUrl){
-        try{
-            const status = await audioInstance.playAsync()
-            await setStatus(status)
-        }
-        catch (e) {
-            console.log(e)
-        }
+    const initalStatus = {
+        shouldPlay: shouldPlay,
+        rate: 1.0,
+        volume: 1.0,
+        isMuted: false,
+        isLooping: false,
+        // shouldCorrectPitch: false
+    }
+    const {sound, status} = await Audio.Sound.createAsync(
+        {uri: audioObj.audioUrl},
+        initalStatus,
+        (status) => onPlaybackStatusUpdate(status, setStatus)
+    )
+    console.log('s2 ', status)
+    setAudioInstance(sound)
+}
+
+export const onPlay = async (audioInstance, currentStatus) => {
+    if(audioInstance !== null) {
+        if(currentStatus.isPlaying)
+            audioInstance.pauseAsync()
+        else
+            audioInstance.playAsync()
     }
 }

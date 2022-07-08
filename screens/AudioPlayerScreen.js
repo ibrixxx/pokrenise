@@ -7,7 +7,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TextTicker from 'react-native-text-ticker'
 import Slider from '@react-native-community/slider';
 import {useNavigation} from "@react-navigation/native";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {currentPlaybackOption, currentAudioObject, currentAudioInstance, currentStatus} from "../atoms/AudioFunctions";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {playbackOptions} from "../utils/playbackOptions";
@@ -20,9 +20,8 @@ export default function AudioPlayerScreen({route}) {
     const { soundItem } = route.params
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
-    const currAudioObject = useRecoilValue(currentAudioObject)
-    const [currAudioInstance, setCurrAudioInstance] = useRecoilState(currentAudioInstance)
-    const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
+    const currAudioInstance = useRecoilValue(currentAudioInstance)
+    const currStatus = useRecoilValue(currentStatus)
 
     const [liked, setLiked] = useState(false)
     const [speed, setSpeed] = useState(1.0)
@@ -44,7 +43,7 @@ export default function AudioPlayerScreen({route}) {
     }
 
     const onPlayButton = () => {
-        onPlay(currAudioInstance, setCurrAudioInstance, currAudioObject, soundItem, currStatus, setCurrStatus)
+        onPlay(currAudioInstance, currStatus)
     }
 
 
@@ -57,12 +56,6 @@ export default function AudioPlayerScreen({route}) {
             return <SimpleLineIcons onPress={() => togglePlaybackIcon(2)} name="loop" size={24} color={Colors[theme].tabIconDefault} />
 
     }
-
-    // useEffect(()=>{
-    //     return sound ? () => {
-    //             sound.unloadAsync(); }
-    //         : undefined;
-    // },[sound])
 
     return (
         <View style={styles.container}>
