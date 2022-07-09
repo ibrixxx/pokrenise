@@ -1,20 +1,14 @@
 import React from 'react';
 import {
     FlatList,
-    Image,
-    ImageBackground,
-    Pressable,
     RefreshControl,
     SafeAreaView,
     ScrollView,
-    SectionList,
     StyleSheet
 } from 'react-native';
 import { Text, View } from '../components/Themed';
-import {FontAwesome} from "@expo/vector-icons";
 import {Title} from "react-native-paper";
 import {useEffect, useState} from "react";
-import { Audio } from 'expo-av';
 import useAxios from "axios-hooks";
 import {getAudio} from "../constants/API";
 import AudioCard from "../components/AudioCard";
@@ -22,7 +16,7 @@ import {scale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import {useRecoilState} from "recoil";
 import {currentAudioInstance, currentAudioObject, currentStatus} from "../atoms/AudioFunctions";
-import {loadPlaybackInstance} from "../utils/AudioPlayer";
+import {loadPlaybackInstance, onPlay} from "../utils/AudioPlayer";
 
 export default function AudioScreen({ navigation }) {
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
@@ -58,9 +52,14 @@ export default function AudioScreen({ navigation }) {
     }, [data])
 
     const handleOnPress = sound => {
-        setCurrAudioObject(sound)
-        loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
-        navigation.navigate('AudioPlayer', {soundItem: sound})
+        if(currAudioInstance !== null && sound.audioUrl === currAudioObject.audioUrl) {
+            navigation.navigate('AudioPlayer', {soundItem: sound})
+        }
+        else {
+            setCurrAudioObject(sound)
+            loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
+            navigation.navigate('AudioPlayer', {soundItem: sound})
+        }
     }
 
     if (loading) return <View style={styles.container}><Text>Loading...</Text></View>

@@ -11,7 +11,8 @@ import {useState} from "react";
 import {currentPlaybackOption, currentAudioObject, currentAudioInstance, currentStatus} from "../atoms/AudioFunctions";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {playbackOptions} from "../utils/playbackOptions";
-import {onPlay} from "../utils/AudioPlayer";
+import {loadPlaybackInstance, onPlay} from "../utils/AudioPlayer";
+import {_getMMSSFromMillis} from "../utils/millisecondFormater";
 
 
 export default function AudioPlayerScreen({route}) {
@@ -26,16 +27,28 @@ export default function AudioPlayerScreen({route}) {
     const [liked, setLiked] = useState(false)
     const [speed, setSpeed] = useState(1.0)
     const [desc, setDesc] = useState(false)
+    const [isSeeking, setIsSeeking] = useState(null)
 
     const togglePlaybackIcon = plbck => {
         setCurrPlaybackOption(playbackOptions[plbck])
     }
 
-    const togglePlaybackSpeed = () => {
-        if(speed !== 1.75)
-            setSpeed((speed + 0.25) % 2)
-        else
-            setSpeed(speed + 0.25)
+    const togglePlaybackSpeed = async () => {
+        if(currAudioInstance !== null) {
+            try {
+                if (speed !== 1.75) {
+                    await currAudioInstance.setRateAsync((speed + 0.25) % 2)
+                    await setSpeed((speed + 0.25) % 2)
+                }
+                else {
+                    await currAudioInstance.setRateAsync(speed + 0.25)
+                    await setSpeed(speed + 0.25)
+                }
+            }
+            catch (e) {
+                console.log('star ti telefon kume - ', e)
+            }
+        }
     }
 
     const toggleDesc = val => {
@@ -43,9 +56,13 @@ export default function AudioPlayerScreen({route}) {
     }
 
     const onPlayButton = () => {
-        onPlay(currAudioInstance, currStatus)
+        if(currAudioInstance !== null) {
+            onPlay(currAudioInstance, currStatus)
+        }
+        else if(currStatus.didJustFinish) {
+            loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
+        }
     }
-
 
     const showPlaybackIcon = () => {
         if(currPlaybackOption === playbackOptions[0])
@@ -54,7 +71,50 @@ export default function AudioPlayerScreen({route}) {
             return <MaterialIcons onPress={() => togglePlaybackIcon(0)} name="sync-disabled" size={24} color={Colors[theme].tabIconDefault} />
         else
             return <SimpleLineIcons onPress={() => togglePlaybackIcon(2)} name="loop" size={24} color={Colors[theme].tabIconDefault} />
+    }
 
+    const onSliderStart = val => {
+        if(currAudioInstance !== null && !isSeeking) {
+            currAudioInstance.pauseAsync()
+        }
+        setIsSeeking(val)
+    }
+
+    const getTimestamp = () => {
+        if(currAudioInstance !== null && currStatus !== null) {
+            if(isSeeking !== null)
+                return `${_getMMSSFromMillis(isSeeking * currStatus.durationMillis)} / ${_getMMSSFromMillis(currStatus.durationMillis)}`
+            return `${_getMMSSFromMillis(currStatus.positionMillis)} / ${_getMMSSFromMillis(currStatus.durationMillis)}`
+        }
+        return ''
+    }
+
+    const onSliderEnd = async val => {
+        if(currAudioInstance !== null) {
+            const newPosition = val * currStatus?.durationMillis
+            await currAudioInstance.playFromPositionAsync(newPosition)
+            await setIsSeeking(null)
+        }
+    }
+
+    const onReplay = async () => {
+        if(currAudioInstance !== null) {
+            currAudioInstance.playFromPositionAsync(0)
+        }
+    }
+
+    const fifteen = async sign => {
+        if(currAudioInstance !== null && currStatus !== null) {
+            if(sign && currStatus.durationMillis === currStatus.positionMillis)
+                return
+            if(!sign && currStatus.positionMillis === 0)
+                return
+            const newPosition = sign? currStatus.positionMillis + 15000 : currStatus.positionMillis - 15000
+            if(currStatus.isPlaying)
+                currAudioInstance.playFromPositionAsync(newPosition)
+            else
+                currAudioInstance.setPositionAsync(newPosition)
+        }
     }
 
     return (
@@ -103,20 +163,31 @@ export default function AudioPlayerScreen({route}) {
             <View style={{flex: 0.5, width: '90%'}}>
                 <Slider
                     style={{width: '100%', height: verticalScale(40)}}
-                    minimumValue={0}
-                    maximumValue={1}
                     minimumTrackTintColor="#FFFFFF"
                     maximumTrackTintColor="#000000"
+                    disabled={currStatus?.isBuffering}
+                    value={currStatus? (isSeeking?? currStatus.positionMillis / currStatus.durationMillis) : 0}
+                    onValueChange={(value) => onSliderStart(value)}
+                    onSlidingComplete={(value) =>  onSliderEnd(value)}
                 />
+                <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: verticalScale(-10)}}>
+                    <Text style={{color: Colors[theme].tabIconDefault, fontSize: 11}}>{currStatus?.isBuffering && 'loading...'}</Text>
+                    {
+                        currStatus?.didJustFinish?
+                        <MaterialIcons onPress={onReplay} name="replay-circle-filled" size={24} color={Colors[theme].tabIconDefault} />
+                        :
+                        <Text style={{color: Colors[theme].tabIconDefault, fontSize: 11}}>{getTimestamp()}</Text>
+                    }
+                </View>
             </View>
             <View style={styles.footer}>
-                <MaterialCommunityIcons name="rewind-15" size={24} color={Colors[theme].tabIconDefault} />
+                <MaterialCommunityIcons onPress={() => fifteen(false)} name="rewind-15" size={24} color={Colors[theme].tabIconDefault} />
                 <MaterialCommunityIcons name="skip-previous" size={33} color={Colors[theme].primary} />
                 <Pressable onPress={onPlayButton} style={[styles.buttonPlay, {backgroundColor: Colors[theme].primary}]}>
                     <Entypo name={currStatus?.isPlaying? "controller-paus":"controller-play"} size={30} color="black" />
                 </Pressable>
                 <MaterialCommunityIcons name="skip-next" size={33} color={Colors[theme].primary} />
-                <MaterialCommunityIcons name="fast-forward-15" size={24} color={Colors[theme].tabIconDefault} />
+                <MaterialCommunityIcons onPress={() => fifteen(true)} name="fast-forward-15" size={24} color={Colors[theme].tabIconDefault} />
             </View>
         </View>
     )

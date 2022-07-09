@@ -1,11 +1,10 @@
 import {Audio} from "expo-av";
 
 const onPlaybackStatusUpdate = (status, setStatus) => {
-    console.log('s1 ', status)
     if(status.isLoaded) {
         setStatus(status)
         if(status.didJustFinish && !status.isLooping) {
-            //play currentPlaybackOption
+            setStatus(status)
         }
     }
     else
@@ -32,7 +31,6 @@ export const loadPlaybackInstance = async (audioInstance, setAudioInstance, audi
         initalStatus,
         (status) => onPlaybackStatusUpdate(status, setStatus)
     )
-    console.log('s2 ', status)
     setAudioInstance(sound)
 }
 
