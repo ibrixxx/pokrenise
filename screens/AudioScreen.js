@@ -15,24 +15,28 @@ import AudioCard from "../components/AudioCard";
 import {scale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import {useRecoilState} from "recoil";
-import {currentAudioInstance, currentAudioObject, currentStatus} from "../atoms/AudioFunctions";
-import {loadPlaybackInstance, onPlay} from "../utils/AudioPlayer";
+import {currentAudioInstance, currentAudioObject, currentPlaylist, currentStatus} from "../atoms/AudioFunctions";
+import {loadPlaybackInstance} from "../utils/AudioPlayer";
 
 export default function AudioScreen({ navigation }) {
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
-    const [music, setMusic] = useState([])
-    const [motivation, setMotivation] = useState([])
-    const [podcasts, setPodcasts] = useState([])
+    const [audio, setAudio] = useState({
+        music: [],
+        motivation: [],
+        podcasts: []
+    })
     const [refreshing, setRefreshing] = React.useState(false);
 
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const [currAudioInstance, setCurrAudioInstance] = useRecoilState(currentAudioInstance)
     const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
+    const [currPlaylist, setCurrPlaylist] = useRecoilState(currentPlaylist)
 
 
 
     useEffect(() => {
         if(data) {
+            // console.log(data)
             let musicArr = []
             let motivationArr = []
             let podcastsArr = []
@@ -45,20 +49,34 @@ export default function AudioScreen({ navigation }) {
                     podcastsArr.push(m)
                 }
             )
-            setMusic(musicArr)
-            setMotivation(motivationArr)
-            setPodcasts(podcastsArr)
+            setAudio({
+                music: musicArr,
+                motivation: motivationArr,
+                podcasts: podcastsArr
+            })
         }
     }, [data])
 
-    const handleOnPress = sound => {
+    const handleOnPress = async sound => {
         if(currAudioInstance !== null && sound.audioUrl === currAudioObject.audioUrl) {
-            navigation.navigate('AudioPlayer', {soundItem: sound})
+            navigation.navigate('AudioPlayer')
         }
         else {
-            setCurrAudioObject(sound)
-            loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
-            navigation.navigate('AudioPlayer', {soundItem: sound})
+            // if(sound.type === 'muzika')
+            //     await setCurrPlaylist(audio.music)
+            // else if(sound.type === 'podcast')
+            //     await setCurrPlaylist(audio.podcasts)
+            // else
+            //     await setCurrPlaylist(audio.motivation)
+            setCurrPlaylist(data.result)
+            await setCurrAudioObject(sound)
+            try {
+                await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
+            }
+            catch (e) {
+                console.log(e)
+            }
+            navigation.navigate('AudioPlayer')
         }
     }
 

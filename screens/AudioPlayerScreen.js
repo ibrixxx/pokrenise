@@ -8,21 +8,28 @@ import TextTicker from 'react-native-text-ticker'
 import Slider from '@react-native-community/slider';
 import {useNavigation} from "@react-navigation/native";
 import {useState} from "react";
-import {currentPlaybackOption, currentAudioObject, currentAudioInstance, currentStatus} from "../atoms/AudioFunctions";
+import {
+    currentPlaybackOption,
+    currentAudioObject,
+    currentAudioInstance,
+    currentStatus,
+    currentPlaylist
+} from "../atoms/AudioFunctions";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {playbackOptions} from "../utils/playbackOptions";
 import {loadPlaybackInstance, onPlay} from "../utils/AudioPlayer";
 import {_getMMSSFromMillis} from "../utils/millisecondFormater";
 
 
-export default function AudioPlayerScreen({route}) {
+export default function AudioPlayerScreen() {
     const theme = useColorScheme()
     const navigation = useNavigation()
-    const { soundItem } = route.params
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
-    const currAudioInstance = useRecoilValue(currentAudioInstance)
-    const currStatus = useRecoilValue(currentStatus)
+    const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
+    const [currAudioInstance, setCurrAudioInstance] = useRecoilState(currentAudioInstance)
+    const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
+    const currPlaylist = useRecoilValue(currentPlaylist)
 
     const [liked, setLiked] = useState(false)
     const [speed, setSpeed] = useState(1.0)
@@ -55,12 +62,22 @@ export default function AudioPlayerScreen({route}) {
         setDesc(val)
     }
 
-    const onPlayButton = () => {
+    const onPlayButton = async () => {
         if(currAudioInstance !== null) {
-            onPlay(currAudioInstance, currStatus)
+            try {
+                await onPlay(currAudioInstance, currStatus)
+            }
+            catch (e){
+                console.log(e)
+            }
         }
         else if(currStatus.didJustFinish) {
-            loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
+            try {
+                await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
+            }
+            catch (e){
+                console.log(e)
+            }
         }
     }
 
@@ -117,6 +134,29 @@ export default function AudioPlayerScreen({route}) {
         }
     }
 
+    const onForward = async () => {
+        const currentIndex = currPlaylist.findIndex( e => e._id === currAudioObject._id)
+        await setCurrAudioObject(currPlaylist[(currentIndex + 1) % currPlaylist.length])
+        try {
+            await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, currPlaylist[(currentIndex + 1) % currPlaylist.length], true, setCurrStatus)
+        }
+        catch (e){
+            console.log(e)
+        }
+    }
+
+    const onBackward = async () => {
+        const currentIndex = currPlaylist.findIndex( e => e._id === currAudioObject._id)
+        const newIndex = currentIndex === 0? currPlaylist.length - 1 : currentIndex - 1
+        await setCurrAudioObject(currPlaylist[newIndex])
+        try {
+            await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, currPlaylist[newIndex], true, setCurrStatus)
+        }
+        catch (e){
+            console.log(e)
+        }
+    }
+
     return (
         <View style={styles.container}>
              <View style={styles.header}>
@@ -135,15 +175,15 @@ export default function AudioPlayerScreen({route}) {
                     marqueeDelay={1000}
                     scrollSpeed={14}
                 >
-                    {soundItem.title}
+                    {currAudioObject.title}
                 </TextTicker>
             </View>
             <Pressable onPress={() => toggleDesc(true)} disabled={desc} style={styles.audioImage}>
-                <Image source={{uri: soundItem.imageUrl}} style={{width: '90%', height: '100%'}} />
+                <Image source={{uri: currAudioObject.imageUrl}} style={{width: '90%', height: '100%'}} />
                 {
                     desc &&
                     <ScrollView style={styles.scrollViewDesc} contentContainerStyle={styles.scrollViewContent}>
-                        <Text style={styles.desc}>{soundItem.description}</Text>
+                        <Text style={styles.desc}>{currAudioObject.description}</Text>
                     </ScrollView>
                 }
                 {
@@ -182,11 +222,11 @@ export default function AudioPlayerScreen({route}) {
             </View>
             <View style={styles.footer}>
                 <MaterialCommunityIcons onPress={() => fifteen(false)} name="rewind-15" size={24} color={Colors[theme].tabIconDefault} />
-                <MaterialCommunityIcons name="skip-previous" size={33} color={Colors[theme].primary} />
+                <MaterialCommunityIcons onPress={onBackward} name="skip-previous" size={33} color={Colors[theme].primary} />
                 <Pressable onPress={onPlayButton} style={[styles.buttonPlay, {backgroundColor: Colors[theme].primary}]}>
                     <Entypo name={currStatus?.isPlaying? "controller-paus":"controller-play"} size={30} color="black" />
                 </Pressable>
-                <MaterialCommunityIcons name="skip-next" size={33} color={Colors[theme].primary} />
+                <MaterialCommunityIcons onPress={onForward} name="skip-next" size={33} color={Colors[theme].primary} />
                 <MaterialCommunityIcons onPress={() => fifteen(true)} name="fast-forward-15" size={24} color={Colors[theme].tabIconDefault} />
             </View>
         </View>
