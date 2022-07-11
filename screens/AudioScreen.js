@@ -62,13 +62,13 @@ export default function AudioScreen({ navigation }) {
             navigation.navigate('AudioPlayer')
         }
         else {
-            // if(sound.type === 'muzika')
-            //     await setCurrPlaylist(audio.music)
-            // else if(sound.type === 'podcast')
-            //     await setCurrPlaylist(audio.podcasts)
-            // else
-            //     await setCurrPlaylist(audio.motivation)
-            setCurrPlaylist(data.result)
+            if(sound.type === 'muzika')
+                await setCurrPlaylist(audio.music)
+            else if(sound.type === 'podcast')
+                await setCurrPlaylist(audio.podcasts)
+            else
+                await setCurrPlaylist(audio.motivation)
+            // setCurrPlaylist(data.result)
             await setCurrAudioObject(sound)
             try {
                 await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
@@ -101,9 +101,9 @@ export default function AudioScreen({ navigation }) {
                 </View>
                 <FlatList
                     horizontal={true}
-                    data={data.result}
+                    data={audio.motivation}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} type={1}/>}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
@@ -115,9 +115,9 @@ export default function AudioScreen({ navigation }) {
                 </View>
                 <FlatList
                     horizontal={true}
-                    data={data.result}
+                    data={audio.music}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} type={2}/>}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
@@ -129,9 +129,9 @@ export default function AudioScreen({ navigation }) {
                 </View>
                 <FlatList
                     horizontal={true}
-                    data={data.result}
+                    data={audio.podcasts}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} />}
+                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} type={3}/>}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />

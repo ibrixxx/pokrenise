@@ -50,7 +50,6 @@ function BottomTabNavigator() {
     return (
         <BottomTab.Navigator
             initialRouteName="Audio"
-            sceneContainerStyle={{marginBottom: 10}}
             screenOptions={{
                 tabBarActiveTintColor: Colors[colorScheme].tabIconSelected,
                 tabBarInactiveTintColor: Colors[colorScheme].tabIconDefault,
