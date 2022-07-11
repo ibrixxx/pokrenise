@@ -8,7 +8,7 @@ import {Text as DefaultText, useColorScheme, View as DefaultView} from 'react-na
 import Colors from '../constants/Colors';
 
 export function useThemeColor(props, colorName) {
-    const theme = useColorScheme();
+    const theme = 'dark' //useColorScheme();
     const colorFromProps = props[theme];
 
     if (colorFromProps) {

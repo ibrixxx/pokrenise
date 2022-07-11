@@ -10,7 +10,7 @@ const AudioCard = ({
     m,
     type
 }) => {
-    const theme = useColorScheme();
+    const theme = 'dark' //useColorScheme();
 
     const formatTitle = () => {
         // if(m.title.length > 19)

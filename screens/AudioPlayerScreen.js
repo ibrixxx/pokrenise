@@ -22,7 +22,7 @@ import {_getMMSSFromMillis} from "../utils/millisecondFormater";
 
 
 export default function AudioPlayerScreen() {
-    const theme = useColorScheme()
+    const theme = 'dark' //useColorScheme()
     const navigation = useNavigation()
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)

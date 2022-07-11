@@ -10,7 +10,7 @@ import {Audio, InterruptionModeAndroid, InterruptionModeIOS} from "expo-av";
 
 export default function App() {
   const isLoadingComplete = useCachedResources();
-  const colorScheme = useColorScheme()
+  const colorScheme = 'dark' //useColorScheme()
 
   useEffect(() => {
       Audio.setAudioModeAsync({
