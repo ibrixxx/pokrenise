@@ -14,9 +14,12 @@ import {getAudio} from "../constants/API";
 import AudioCard from "../components/AudioCard";
 import {scale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
-import {useRecoilState} from "recoil";
-import {currentAudioInstance, currentAudioObject, currentPlaylist, currentStatus} from "../atoms/AudioFunctions";
-import {loadPlaybackInstance} from "../utils/AudioPlayer";
+import {useRecoilState, useRecoilValue} from "recoil";
+import {
+    currentAudioInstance,
+    currentAudioObject,
+    currentPlaylist,
+} from "../atoms/AudioFunctions";
 
 export default function AudioScreen({ navigation }) {
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
@@ -28,8 +31,7 @@ export default function AudioScreen({ navigation }) {
     const [refreshing, setRefreshing] = React.useState(false);
 
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
-    const [currAudioInstance, setCurrAudioInstance] = useRecoilState(currentAudioInstance)
-    const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
+    const currAudioInstance = useRecoilValue(currentAudioInstance)
     const [currPlaylist, setCurrPlaylist] = useRecoilState(currentPlaylist)
 
 
@@ -57,26 +59,26 @@ export default function AudioScreen({ navigation }) {
         }
     }, [data])
 
-    const handleOnPress = async sound => {
-        if(currAudioInstance !== null && sound.audioUrl === currAudioObject.audioUrl) {
-            navigation.navigate('AudioPlayer')
+    const handleOnPress = async (sound, index) => {
+        let pressedPlaylist = []
+        if(sound.type === 'muzika') {
+            await setCurrPlaylist(audio.music)
+            pressedPlaylist = audio.music
+        }
+        else if(sound.type === 'podcast') {
+            await setCurrPlaylist(audio.podcasts)
+            pressedPlaylist = audio.podcasts
         }
         else {
-            if(sound.type === 'muzika')
-                await setCurrPlaylist(audio.music)
-            else if(sound.type === 'podcast')
-                await setCurrPlaylist(audio.podcasts)
-            else
-                await setCurrPlaylist(audio.motivation)
-            // setCurrPlaylist(data.result)
-            await setCurrAudioObject(sound)
-            try {
-                await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
-            }
-            catch (e) {
-                console.log(e)
-            }
-            navigation.navigate('AudioPlayer')
+            await setCurrPlaylist(audio.motivation)
+            pressedPlaylist = audio.motivation
+        }
+        if(currAudioInstance !== null && sound.audioUrl === pressedPlaylist[currAudioObject]?.audioUrl) {
+            navigation.navigate('AudioPlayer', {pressedSound: null})
+        }
+        else {
+            setCurrAudioObject(index)
+            navigation.navigate('AudioPlayer', {pressedSound: sound})
         }
     }
 
@@ -103,7 +105,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={audio.motivation}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} type={1}/>}
+                    renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={1}/>}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
@@ -117,7 +119,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={audio.music}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} type={2}/>}
+                    renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={2}/>}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />
@@ -131,7 +133,7 @@ export default function AudioScreen({ navigation }) {
                     horizontal={true}
                     data={audio.podcasts}
                     showsHorizontalScrollIndicator={false}
-                    renderItem={({item}) => <AudioCard handleOnPress={handleOnPress} m={item} type={3}/>}
+                    renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={3}/>}
                     keyExtractor={item => item._id}
                     ListEmptyComponent={() => <Text>Nema podataka</Text>}
                 />

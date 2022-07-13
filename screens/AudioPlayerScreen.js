@@ -1,13 +1,14 @@
-import {Image, Pressable, ScrollView, StyleSheet, useColorScheme} from 'react-native';
+import {Image, Share, Pressable, ScrollView, StyleSheet, useColorScheme} from 'react-native';
 import {Text, View} from "../components/Themed";
-import {AntDesign, Entypo, FontAwesome, MaterialIcons, SimpleLineIcons} from '@expo/vector-icons';
+import {AntDesign, Entypo, MaterialIcons, SimpleLineIcons} from '@expo/vector-icons';
 import {scale, verticalScale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TextTicker from 'react-native-text-ticker'
 import Slider from '@react-native-community/slider';
 import {useNavigation} from "@react-navigation/native";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import * as Sharing from 'expo-sharing';
 import {
     currentPlaybackOption,
     currentAudioObject,
@@ -17,13 +18,14 @@ import {
 } from "../atoms/AudioFunctions";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {playbackOptions} from "../utils/playbackOptions";
-import {loadPlaybackInstance, onPlay} from "../utils/AudioPlayer";
 import {_getMMSSFromMillis} from "../utils/millisecondFormater";
+import {Audio} from "expo-av";
 
 
-export default function AudioPlayerScreen() {
+export default function AudioPlayerScreen({route}) {
     const theme = 'dark' //useColorScheme()
     const navigation = useNavigation()
+    const { pressedSound } = route.params
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
@@ -36,8 +38,89 @@ export default function AudioPlayerScreen() {
     const [desc, setDesc] = useState(false)
     const [isSeeking, setIsSeeking] = useState(null)
 
-    const togglePlaybackIcon = plbck => {
+    useEffect(() => {
+        (async () => {
+            if(pressedSound?.audioUrl === currPlaylist[currAudioObject]?.audioUrl) {
+                try {
+                    await loadPlaybackInstance(true, currAudioObject)
+                }
+                catch (e) {
+                    console.log(e)
+                }
+            }
+        })()
+    }, [])
+
+    const onPlaybackStatusUpdate = async (status) => {
+        if(status.isLoaded) {
+            setCurrStatus(status)
+            // if(status.didJustFinish && !status.isLooping) {
+                // try {
+                //     if(currPlaybackOption === playbackOptions[0]) {
+                //         await setCurrAudioObject((currAudioObject + 1) % currPlaylist.length)
+                //         await playNextOnFinish((currAudioObject + 1) % currPlaylist.length)
+                //     }
+                // }
+                // catch (e) {
+                //     console.log(e)
+                // }
+            // }
+        }
+        else
+            if(status.error) {
+                console.log('FATAL ERROR ' + status.error)
+            }
+    }
+
+    const loadPlaybackInstance = async (shouldPlay, index) => {
+        if(currAudioInstance !== null) {
+            await currAudioInstance.unloadAsync()
+            await setCurrAudioInstance(null)
+        }
+        const initalStatus = {
+            shouldPlay: shouldPlay,
+            rate: 1.0,
+            volume: 1.0,
+            isMuted: false,
+            isLooping: currPlaybackOption === playbackOptions[1],
+            // shouldCorrectPitch: false
+        }
+        const {sound, status} = await Audio.Sound.createAsync(
+            {uri: currPlaylist[index]?.audioUrl},
+            initalStatus,
+            onPlaybackStatusUpdate
+        )
+        await setCurrAudioInstance(sound)
+    }
+
+    const onPlay = async () => {
+        if(currAudioInstance !== null) {
+            if(currStatus.isPlaying)
+                currAudioInstance.pauseAsync()
+            else
+                currAudioInstance.playAsync()
+        }
+    }
+
+    const playNextOnFinish = async (index) => {
+        try {
+            await loadPlaybackInstance(true, index)
+        }
+        catch (e){
+            console.log(e)
+        }
+    }
+
+    const togglePlaybackIcon = async plbck => {
         setCurrPlaybackOption(playbackOptions[plbck])
+        if(currAudioInstance !== null) {
+            try {
+                await currAudioInstance.setIsLoopingAsync(playbackOptions[plbck] === playbackOptions[1])
+            }
+            catch (e) {
+                console.log(e)
+            }
+        }
     }
 
     const togglePlaybackSpeed = async () => {
@@ -71,23 +154,15 @@ export default function AudioPlayerScreen() {
                 console.log(e)
             }
         }
-        else if(currStatus.didJustFinish) {
-            try {
-                await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, sound, true, setCurrStatus)
-            }
-            catch (e){
-                console.log(e)
-            }
-        }
     }
 
     const showPlaybackIcon = () => {
         if(currPlaybackOption === playbackOptions[0])
-            return <MaterialIcons onPress={() => togglePlaybackIcon(1)} name="sync-alt" size={24} color={Colors[theme].tabIconDefault} />
+            return <MaterialIcons style={{width: scale(30)}} onPress={() => togglePlaybackIcon(1)} name="sync-alt" size={24} color={Colors[theme].tabIconDefault} />
         else if(currPlaybackOption === playbackOptions[2])
-            return <MaterialIcons onPress={() => togglePlaybackIcon(0)} name="sync-disabled" size={24} color={Colors[theme].tabIconDefault} />
+            return <MaterialIcons style={{width: scale(30)}} onPress={() => togglePlaybackIcon(0)} name="sync-disabled" size={24} color={Colors[theme].tabIconDefault} />
         else
-            return <SimpleLineIcons onPress={() => togglePlaybackIcon(2)} name="loop" size={24} color={Colors[theme].tabIconDefault} />
+            return <SimpleLineIcons style={{width: scale(30)}} onPress={() => togglePlaybackIcon(2)} name="loop" size={24} color={Colors[theme].tabIconDefault} />
     }
 
     const onSliderStart = val => {
@@ -135,25 +210,45 @@ export default function AudioPlayerScreen() {
     }
 
     const onForward = async () => {
-        const currentIndex = currPlaylist.findIndex( e => e._id === currAudioObject._id)
-        await setCurrAudioObject(currPlaylist[(currentIndex + 1) % currPlaylist.length])
         try {
-            await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, currPlaylist[(currentIndex + 1) % currPlaylist.length], true, setCurrStatus)
+            await playNextOnFinish()
+        }
+        catch (e) {
+            console.log(e)
+        }
+    }
+
+    const onBackward = async () => {
+        const newIndex = currAudioObject === 0? currPlaylist.length - 1 : currAudioObject - 1
+        await setCurrAudioObject(newIndex)
+        try {
+            await loadPlaybackInstance(true, newIndex)
         }
         catch (e){
             console.log(e)
         }
     }
 
-    const onBackward = async () => {
-        const currentIndex = currPlaylist.findIndex( e => e._id === currAudioObject._id)
-        const newIndex = currentIndex === 0? currPlaylist.length - 1 : currentIndex - 1
-        await setCurrAudioObject(currPlaylist[newIndex])
+    const onShare = async () => {
+        const url = currPlaylist[currAudioObject].audioUrl;
+        const title = currPlaylist[currAudioObject].title;
+        const message = currPlaylist[currAudioObject].description;
+
         try {
-            await loadPlaybackInstance(currAudioInstance, setCurrAudioInstance, currPlaylist[newIndex], true, setCurrStatus)
-        }
-        catch (e){
-            console.log(e)
+            const result = await Share.share({
+                message: 'React Native | A framework for building native apps using React',
+            });
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    // shared with activity type of result.activityType
+                } else {
+                    // shared
+                }
+            } else if (result.action === Share.dismissedAction) {
+                // dismissed
+            }
+        } catch (error) {
+            alert(error.message);
         }
     }
 
@@ -163,7 +258,7 @@ export default function AudioPlayerScreen() {
                 <AntDesign name="down" onPress={() => navigation.goBack()} size={24} color={Colors[theme].tabIconDefault} />
                 <View style={{flexDirection: 'row'}}>
                     <AntDesign name="download" size={24} style={{paddingRight: scale(10)}} color={Colors[theme].primary} />
-                    <AntDesign name="sharealt" size={24} style={{paddingLeft: scale(10)}} color={Colors[theme].primary} />
+                    <AntDesign onPress={onShare} name="sharealt" size={24} style={{paddingLeft: scale(10)}} color={Colors[theme].primary} />
                 </View>
             </View>
             <View style={{flex: 0.5, width: '90%', alignItems: 'center'}}>
@@ -175,15 +270,15 @@ export default function AudioPlayerScreen() {
                     marqueeDelay={1000}
                     scrollSpeed={14}
                 >
-                    {currAudioObject.title}
+                    {currPlaylist[currAudioObject]?.title}
                 </TextTicker>
             </View>
             <Pressable onPress={() => toggleDesc(true)} disabled={desc} style={styles.audioImage}>
-                <Image source={{uri: currAudioObject.imageUrl}} style={{width: '90%', height: '100%'}} />
+                <Image source={{uri: currPlaylist[currAudioObject]?.imageUrl}} style={{width: '90%', height: '100%'}} />
                 {
                     desc &&
                     <ScrollView style={styles.scrollViewDesc} contentContainerStyle={styles.scrollViewContent}>
-                        <Text style={styles.desc}>{currAudioObject.description}</Text>
+                        <Text style={styles.desc}>{currPlaylist[currAudioObject]?.description}</Text>
                     </ScrollView>
                 }
                 {

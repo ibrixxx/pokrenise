@@ -13,8 +13,8 @@ const AudioCard = ({
     const theme = 'dark' //useColorScheme();
 
     const formatTitle = () => {
-        // if(m.title.length > 19)
-        //     return m.title.substring(0, 19).concat('...')
+        if(m.title.length > 33)
+            return m.title.substring(0, 33).concat('...')
         return m.title
     }
 
@@ -22,15 +22,14 @@ const AudioCard = ({
         if(type === 1)
             return ['transparent', Colors[theme].primary, Colors[theme].primary]
         else if(type === 2)
-            return ['transparent', 'green', 'green']
+            return ['transparent', 'olive', 'olive']
         return ['transparent', 'red', 'red']
     }
 
     return (
-        <Pressable onPress={() => handleOnPress(m)} style={[styles.card, {backgroundColor: Colors[theme].primary}]}>
+        <Pressable onPress={() => handleOnPress()} style={[styles.card, {backgroundColor: Colors[theme].primary}]}>
             <Image resizeMode={'cover'} source={{uri: m.imageUrl}} style={styles.image}/>
             <LinearGradient
-                // Button Linear Gradient
                 colors={getGradientColors()}
                 style={styles.button}>
                 <Text style={styles.title}>{formatTitle()}</Text>
