@@ -86,7 +86,7 @@ export default function AudioPlayerScreen({route}) {
             // shouldCorrectPitch: false
         }
         const {sound, status} = await Audio.Sound.createAsync(
-            {uri: "file:///data/user/0/host.exp.exponent/files/ExperienceData/%2540ibrahimmesan%252Fmotivakcija/Masa%20Masa.mp3"},
+            {uri: currPlaylist[currAudioObject]?.audioUrl},
             initalStatus,
             onPlaybackStatusUpdate
         )

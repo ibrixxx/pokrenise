@@ -4,7 +4,7 @@ import {
     RefreshControl,
     SafeAreaView,
     ScrollView,
-    StyleSheet
+    StyleSheet, TouchableOpacity
 } from 'react-native';
 import { Text, View } from '../components/Themed';
 import {Title} from "react-native-paper";
@@ -12,7 +12,7 @@ import {useEffect, useState} from "react";
 import useAxios from "axios-hooks";
 import {getAudio} from "../constants/API";
 import AudioCard from "../components/AudioCard";
-import {scale} from "react-native-size-matters";
+import {scale, verticalScale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {
@@ -21,8 +21,11 @@ import {
     currentPlaylist, downloadedAudios,
 } from "../atoms/AudioFunctions";
 import * as FileSystem from "expo-file-system";
+import {AntDesign} from "@expo/vector-icons";
+import {LinearGradient} from "expo-linear-gradient";
 
 export default function AudioScreen({ navigation }) {
+    const theme = 'dark'
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
     const [audio, setAudio] = useState({
         music: [],
@@ -48,7 +51,7 @@ export default function AudioScreen({ navigation }) {
             await setDownloaded(result)
             console.log(result)
         })()
-    }, [])
+    }, [setDownloaded])
 
     useEffect(() => {
         if(data) {
@@ -100,7 +103,7 @@ export default function AudioScreen({ navigation }) {
     if (error) return <View style={styles.container}><Text>Error!</Text></View>
 
     return (
-        <SafeAreaView style={{flex: 1, paddingTop: scale(30), backgroundColor: Colors['dark'].background}}>
+        <SafeAreaView style={{flex: 1, paddingTop: scale(30), backgroundColor: Colors[theme].background}}>
             <ScrollView
                 contentContainerStyle={styles.container}
                 refreshControl={
@@ -110,9 +113,31 @@ export default function AudioScreen({ navigation }) {
                     />
                 }
             >
+                <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: scale(20)}}>
+                    <TouchableOpacity style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
+                        <LinearGradient
+                            colors={[Colors[theme].primary, 'black']}
+                            style={styles.playlistGradient}
+                            end={{x: 0.25, y: 0.85}}
+                        >
+                            <AntDesign name="clouddownload" size={24} color={Colors[theme].primary} />
+                            <Text style={[styles.playlistText, {color: Colors[theme].primary}]}>skinuto</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
+                        <LinearGradient
+                            colors={[Colors[theme].primary, 'black']}
+                            style={styles.playlistGradient}
+                            end={{x: 0.25, y: 0.85}}
+                        >
+                            <AntDesign name="heart" size={20} color={Colors[theme].primary} />
+                            <Text style={[styles.playlistText, {color: Colors[theme].primary}]}>lajkovano</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title style={{color: 'white'}}>
-                        Motivakcija
+                    <Title style={{color: Colors[theme].text}}>
+                        motivakcija
                     </Title>
                 </View>
                 <FlatList
@@ -125,8 +150,8 @@ export default function AudioScreen({ navigation }) {
                 />
 
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title style={{color: 'white'}}>
-                        Muzika
+                    <Title style={{color: Colors[theme].text}}>
+                        muzika
                     </Title>
                 </View>
                 <FlatList
@@ -139,8 +164,8 @@ export default function AudioScreen({ navigation }) {
                 />
 
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title style={{color: 'white'}}>
-                        Podcasti
+                    <Title style={{color: Colors[theme].text}}>
+                        podcasti
                     </Title>
                 </View>
                 <FlatList
@@ -175,4 +200,24 @@ const styles = StyleSheet.create({
         height: 1,
         width: '80%',
     },
+    playlistButton: {
+        borderWidth: scale(1),
+        borderRadius: scale(12),
+        width: '40%',
+        height: verticalScale(40),
+    },
+    playlistGradient: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: scale(10),
+        width: '100%',
+        height: '100%',
+        borderRadius: scale(12),
+    },
+    playlistText: {
+        fontWeight: 'bold',
+        fontStyle: 'italic',
+        marginLeft: scale(5)
+    }
 });
