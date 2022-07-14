@@ -8,7 +8,7 @@ import TextTicker from 'react-native-text-ticker'
 import Slider from '@react-native-community/slider';
 import {useNavigation} from "@react-navigation/native";
 import {useEffect, useState} from "react";
-import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
 import {
     currentPlaybackOption,
     currentAudioObject,
@@ -49,7 +49,7 @@ export default function AudioPlayerScreen({route}) {
                 }
             }
         })()
-    }, [])
+    }, [currAudioObject, currPlaylist])
 
     const onPlaybackStatusUpdate = async (status) => {
         if(status.isLoaded) {
@@ -86,7 +86,7 @@ export default function AudioPlayerScreen({route}) {
             // shouldCorrectPitch: false
         }
         const {sound, status} = await Audio.Sound.createAsync(
-            {uri: currPlaylist[index]?.audioUrl},
+            {uri: "file:///data/user/0/host.exp.exponent/files/ExperienceData/%2540ibrahimmesan%252Fmotivakcija/Masa%20Masa.mp3"},
             initalStatus,
             onPlaybackStatusUpdate
         )
@@ -236,20 +236,24 @@ export default function AudioPlayerScreen({route}) {
 
         try {
             const result = await Share.share({
-                message: 'React Native | A framework for building native apps using React',
+                message: `${title} ⬇🎧⬇ ${url}`,
             });
-            if (result.action === Share.sharedAction) {
-                if (result.activityType) {
-                    // shared with activity type of result.activityType
-                } else {
-                    // shared
-                }
-            } else if (result.action === Share.dismissedAction) {
-                // dismissed
-            }
         } catch (error) {
             alert(error.message);
         }
+    }
+
+    const onDownload = async () => {
+        FileSystem.downloadAsync(
+            currPlaylist[currAudioObject].audioUrl,
+            FileSystem.documentDirectory + `${currPlaylist[currAudioObject].title}.mp3`
+        )
+            .then(({ uri }) => {
+                console.log('Finished downloading to ', uri);
+            })
+            .catch(error => {
+                console.error(error);
+            });
     }
 
     return (
@@ -257,8 +261,8 @@ export default function AudioPlayerScreen({route}) {
              <View style={styles.header}>
                 <AntDesign name="down" onPress={() => navigation.goBack()} size={24} color={Colors[theme].tabIconDefault} />
                 <View style={{flexDirection: 'row'}}>
-                    <AntDesign name="download" size={24} style={{paddingRight: scale(10)}} color={Colors[theme].primary} />
-                    <AntDesign onPress={onShare} name="sharealt" size={24} style={{paddingLeft: scale(10)}} color={Colors[theme].primary} />
+                    <AntDesign onPress={onDownload} name="download" size={24} style={{paddingHorizontal: scale(10)}} color={Colors[theme].primary} />
+                    <AntDesign onPress={onShare} name="sharealt" size={24} style={{paddingHorizontal: scale(10)}} color={Colors[theme].primary} />
                 </View>
             </View>
             <View style={{flex: 0.5, width: '90%', alignItems: 'center'}}>

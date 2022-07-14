@@ -46,6 +46,11 @@ export const currentPlaybackOption = atom({
     default: playbackOptions[0]
 })
 
+export const downloadedAudios = atom({
+    key: 'downloadedAudios',
+    default: {}
+})
+
 
 
 
