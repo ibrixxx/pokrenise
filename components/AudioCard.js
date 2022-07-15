@@ -22,8 +22,8 @@ const AudioCard = ({
         if(type === 1)
             return ['transparent', Colors[theme].primary, Colors[theme].primary]
         else if(type === 2)
-            return ['transparent', 'olive', 'olive']
-        return ['transparent', 'red', 'red']
+            return ['transparent', 'dodgerblue', 'blue']
+        return ['transparent', 'red', 'firebrick']
     }
 
     return (

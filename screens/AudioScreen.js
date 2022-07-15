@@ -6,8 +6,7 @@ import {
     ScrollView,
     StyleSheet, TouchableOpacity
 } from 'react-native';
-import { Text, View } from '../components/Themed';
-import {Title} from "react-native-paper";
+import { Text, View, Title } from '../components/Themed';
 import {useEffect, useState} from "react";
 import useAxios from "axios-hooks";
 import {getAudio} from "../constants/API";
@@ -23,6 +22,7 @@ import {
 import * as FileSystem from "expo-file-system";
 import {AntDesign} from "@expo/vector-icons";
 import {LinearGradient} from "expo-linear-gradient";
+import LottieView from "lottie-react-native";
 
 export default function AudioScreen({ navigation }) {
     const theme = 'dark'
@@ -99,7 +99,18 @@ export default function AudioScreen({ navigation }) {
         }
     }
 
-    if (loading) return <View style={styles.container}><Text>Loading...</Text></View>
+    if (loading) return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                            <LottieView
+                                autoPlay={true}
+                                speed={2}
+                                loop={true}
+                                style={{
+                                    width: scale(100),
+                                    height: verticalScale(100),
+                                }}
+                                source={require('../assets/gif/muscle.json')}
+                            />
+                        </View>
     if (error) return <View style={styles.container}><Text>Error!</Text></View>
 
     return (
@@ -114,7 +125,7 @@ export default function AudioScreen({ navigation }) {
                 }
             >
                 <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: scale(20)}}>
-                    <TouchableOpacity style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Downloads')} style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
                         <LinearGradient
                             colors={[Colors[theme].primary, 'black']}
                             style={styles.playlistGradient}
@@ -136,7 +147,7 @@ export default function AudioScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title style={{color: Colors[theme].text}}>
+                    <Title colors={['transparent', Colors[theme].primary]}>
                         motivakcija
                     </Title>
                 </View>
@@ -150,7 +161,7 @@ export default function AudioScreen({ navigation }) {
                 />
 
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title style={{color: Colors[theme].text}}>
+                    <Title colors={['transparent', 'dodgerblue']}>
                         muzika
                     </Title>
                 </View>
@@ -164,7 +175,7 @@ export default function AudioScreen({ navigation }) {
                 />
 
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title style={{color: Colors[theme].text}}>
+                    <Title colors={['transparent', 'firebrick']}>
                         podcasti
                     </Title>
                 </View>

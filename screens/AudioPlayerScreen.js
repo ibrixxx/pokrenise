@@ -1,42 +1,47 @@
-import {Image, Share, Pressable, ScrollView, StyleSheet, useColorScheme} from 'react-native';
+import {Image, Share, Pressable, ScrollView, StyleSheet} from 'react-native';
 import {Text, View} from "../components/Themed";
-import {AntDesign, Entypo, MaterialIcons, SimpleLineIcons} from '@expo/vector-icons';
+import {AntDesign, Entypo, FontAwesome5, MaterialIcons, SimpleLineIcons} from '@expo/vector-icons';
 import {scale, verticalScale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import TextTicker from 'react-native-text-ticker'
 import Slider from '@react-native-community/slider';
 import {useNavigation} from "@react-navigation/native";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import * as FileSystem from 'expo-file-system';
 import {
     currentPlaybackOption,
     currentAudioObject,
     currentAudioInstance,
     currentStatus,
-    currentPlaylist
+    currentPlaylist, downloadedAudios
 } from "../atoms/AudioFunctions";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {playbackOptions} from "../utils/playbackOptions";
 import {_getMMSSFromMillis} from "../utils/millisecondFormater";
 import {Audio} from "expo-av";
+import LottieView from 'lottie-react-native';
 
 
 export default function AudioPlayerScreen({route}) {
     const theme = 'dark' //useColorScheme()
     const navigation = useNavigation()
     const { pressedSound } = route.params
+    const animation = useRef(null);
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const [currAudioInstance, setCurrAudioInstance] = useRecoilState(currentAudioInstance)
     const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
     const currPlaylist = useRecoilValue(currentPlaylist)
+    const downloaded = useRecoilValue(downloadedAudios)
 
     const [liked, setLiked] = useState(false)
     const [speed, setSpeed] = useState(1.0)
     const [desc, setDesc] = useState(false)
     const [isSeeking, setIsSeeking] = useState(null)
+    const [downloading, setDownloading] = useState({animation: false, failed: false})
+
 
     useEffect(() => {
         (async () => {
@@ -83,7 +88,7 @@ export default function AudioPlayerScreen({route}) {
             volume: 1.0,
             isMuted: false,
             isLooping: currPlaybackOption === playbackOptions[1],
-            // shouldCorrectPitch: false
+            shouldCorrectPitch: true
         }
         const {sound, status} = await Audio.Sound.createAsync(
             {uri: currPlaylist[currAudioObject]?.audioUrl},
@@ -244,6 +249,7 @@ export default function AudioPlayerScreen({route}) {
     }
 
     const onDownload = async () => {
+        await setDownloading({animation: true, failed: false})
         FileSystem.downloadAsync(
             currPlaylist[currAudioObject].audioUrl,
             FileSystem.documentDirectory + `${currPlaylist[currAudioObject].title}.mp3`
@@ -253,7 +259,13 @@ export default function AudioPlayerScreen({route}) {
             })
             .catch(error => {
                 console.error(error);
+                setDownloading({animation: false, failed: true})
             });
+    }
+
+    const isDownloaded = () => {
+        const downloadedArr = Object.keys(downloaded)
+        return downloadedArr.includes(currPlaylist[currAudioObject].title+'.mp3')
     }
 
     return (
@@ -261,7 +273,28 @@ export default function AudioPlayerScreen({route}) {
              <View style={styles.header}>
                 <AntDesign name="down" onPress={() => navigation.goBack()} size={24} color={Colors[theme].tabIconDefault} />
                 <View style={{flexDirection: 'row'}}>
-                    <AntDesign onPress={onDownload} name="download" size={24} style={{paddingHorizontal: scale(10)}} color={Colors[theme].primary} />
+                    {(downloading.animation && !downloading.failed)?
+                        <LottieView
+                            autoPlay={true}
+                            ref={animation}
+                            loop={false}
+                            style={{
+                                width: scale(50),
+                                height: verticalScale(45),
+                                margin: scale(-6)
+                            }}
+                            onAnimationFinish={() => {
+                                setDownloading(prevState => ({animation: false, failed: prevState.failed}))
+                            }}
+                            source={require('../assets/gif/download.json')}
+                        />
+                        :
+                        isDownloaded()?
+                            <FontAwesome5 name="check-circle" size={24} color={Colors[theme].primary} style={{paddingHorizontal: scale(10)}}/>
+                            :
+                            <AntDesign onPress={onDownload} name="download" size={24} style={{paddingHorizontal: scale(10)}} color={Colors[theme].primary}/>
+                    }
+
                     <AntDesign onPress={onShare} name="sharealt" size={24} style={{paddingHorizontal: scale(10)}} color={Colors[theme].primary} />
                 </View>
             </View>
