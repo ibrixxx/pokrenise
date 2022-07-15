@@ -2,11 +2,11 @@ import { StatusBar } from 'expo-status-bar';
 import Navigation from "./navigation";
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import useCachedResources from "./hooks/useCachedResources";
-import {useColorScheme} from "react-native";
 import ContextProvider from "./context/AppContext";
 import {RecoilRoot, useRecoilState} from "recoil";
 import {useEffect} from "react";
 import {Audio, InterruptionModeAndroid, InterruptionModeIOS} from "expo-av";
+import Colors from "./constants/Colors";
 
 
 export default function App() {
@@ -29,7 +29,7 @@ export default function App() {
   else
     return (
       <SafeAreaProvider>
-        <StatusBar />
+        <StatusBar style={"light"} backgroundColor={Colors[colorScheme].background}/>
         <RecoilRoot>
             <ContextProvider>
                 <Navigation colorScheme={colorScheme}/>

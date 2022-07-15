@@ -146,7 +146,7 @@ export default function AudioScreen({ navigation }) {
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
-                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginTop: verticalScale(14)}}>
                     <Title colors={['transparent', Colors[theme].primary]}>
                         motivakcija
                     </Title>

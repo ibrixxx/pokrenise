@@ -60,15 +60,14 @@ export default function AudioPlayerScreen({route}) {
         if(status.isLoaded) {
             setCurrStatus(status)
             // if(status.didJustFinish && !status.isLooping) {
-                // try {
-                //     if(currPlaybackOption === playbackOptions[0]) {
-                //         await setCurrAudioObject((currAudioObject + 1) % currPlaylist.length)
-                //         await playNextOnFinish((currAudioObject + 1) % currPlaylist.length)
-                //     }
-                // }
-                // catch (e) {
-                //     console.log(e)
-                // }
+            //     try {
+            //         if(currPlaybackOption === playbackOptions[0]) {
+            //             await playNextOnFinish()
+            //         }
+            //     }
+            //     catch (e) {
+            //         console.log(e)
+            //     }
             // }
         }
         else
@@ -107,9 +106,10 @@ export default function AudioPlayerScreen({route}) {
         }
     }
 
-    const playNextOnFinish = async (index) => {
+    const playNextOnFinish = async () => {
+        await setCurrAudioObject((currAudioObject + 1) % currPlaylist.length)
         try {
-            await loadPlaybackInstance(true, index)
+            await loadPlaybackInstance(true, (currAudioObject + 1) % currPlaylist.length)
         }
         catch (e){
             console.log(e)
