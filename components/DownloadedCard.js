@@ -1,7 +1,7 @@
 import {scale, verticalScale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
-import {Text} from "./Themed";
+import {Text, View} from "./Themed";
 import {StyleSheet, TouchableOpacity} from "react-native";
 import {LinearGradient} from "expo-linear-gradient";
 
@@ -11,12 +11,15 @@ const DownloadedCard = ({title}) => {
     return (
         <TouchableOpacity style={[styles.card, {borderColor: Colors[theme].primary}]}>
             <LinearGradient
-                colors={['black', Colors[theme].primary]}
+                colors={['black', 'transparent']}
                 style={styles.gradient}
                 end={{x: 0.25, y: 0.85}}
             >
-                <MaterialCommunityIcons name="file-music" size={24} color={Colors[theme].primary} />
-                <Text style={{color: Colors[theme].tabIconDefault, fontWeight: 'bold', fontStyle: 'italic'}}>{title}</Text>
+                <View style={{flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', backgroundColor: 'transparent'}}>
+                    <MaterialCommunityIcons name="file-music" size={24} color={Colors[theme].primary} />
+                    <Text style={{color: Colors[theme].tabIconDefault, fontWeight: 'bold', fontStyle: 'italic', width: '80%'}}>{title}</Text>
+                </View>
+                <MaterialCommunityIcons onPress={() => console.log('aaa')} style={{width: '100%', height: '100%', alignItems: 'center'}} name="delete-outline" size={24} color={Colors[theme].tabIconDefault} />
             </LinearGradient>
         </TouchableOpacity>
     )
@@ -33,7 +36,7 @@ const styles = StyleSheet.create({
     gradient: {
         flexDirection: 'row',
         padding: scale(14),
-        justifyContent: 'flex-start',
+        justifyContent: 'space-between',
         alignItems: 'center',
         borderRadius: scale(10),
     }

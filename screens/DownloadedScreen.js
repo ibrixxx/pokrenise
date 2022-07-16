@@ -1,5 +1,4 @@
-import {FlatList, SafeAreaView, StyleSheet} from 'react-native';
-import {View} from "../components/Themed";
+import {FlatList, LogBox, SafeAreaView, StyleSheet} from 'react-native';
 import {useRecoilValue} from "recoil";
 import {downloadedAudios} from "../atoms/AudioFunctions";
 import Colors from "../constants/Colors";
@@ -7,10 +6,24 @@ import {Caption, Title} from "react-native-paper";
 import {scale} from "react-native-size-matters";
 import DownloadedCard from "../components/DownloadedCard";
 import {LinearGradient} from "expo-linear-gradient";
+import {useState} from "react";
 
-export default function DownloadedScreen() {
+
+export default function DownloadedScreen({route}) {
     const downloaded = useRecoilValue(downloadedAudios)
     const theme = 'dark'
+    const {fetchDownloaded} = route.params
+    const [refreshing, setRefreshing] = useState(false)
+
+    LogBox.ignoreLogs([
+        'Non-serializable values were found in the navigation state',
+    ]);
+
+    const onRefresh = async () => {
+        await setRefreshing(true)
+        await fetchDownloaded()
+        await setRefreshing(false)
+    }
 
     return (
         <SafeAreaView style={{flex: 1, paddingTop: scale(30), paddingHorizontal: scale(30), backgroundColor: Colors[theme].background}}>
@@ -28,9 +41,11 @@ export default function DownloadedScreen() {
                 </Caption>
             </LinearGradient>
             <FlatList
+                refreshing={refreshing}
                 data={Object.keys(downloaded)}
                 renderItem={({item}) => <DownloadedCard title={item}/>}
                 keyExtractor={(item, index) => item+index}
+                onRefresh={() => onRefresh()}
             />
         </SafeAreaView>
     )

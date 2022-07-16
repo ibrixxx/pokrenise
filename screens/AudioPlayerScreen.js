@@ -1,4 +1,4 @@
-import {Image, Share, Pressable, ScrollView, StyleSheet} from 'react-native';
+import {Image, Share, Pressable, ScrollView, StyleSheet, LogBox} from 'react-native';
 import {Text, View} from "../components/Themed";
 import {AntDesign, Entypo, FontAwesome5, MaterialIcons, SimpleLineIcons} from '@expo/vector-icons';
 import {scale, verticalScale} from "react-native-size-matters";
@@ -26,7 +26,7 @@ import LottieView from 'lottie-react-native';
 export default function AudioPlayerScreen({route}) {
     const theme = 'dark' //useColorScheme()
     const navigation = useNavigation()
-    const { pressedSound } = route.params
+    const { pressedSound, fetchDownloaded } = route.params
     const animation = useRef(null);
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
@@ -40,8 +40,11 @@ export default function AudioPlayerScreen({route}) {
     const [speed, setSpeed] = useState(1.0)
     const [desc, setDesc] = useState(false)
     const [isSeeking, setIsSeeking] = useState(null)
-    const [downloading, setDownloading] = useState({animation: false, failed: false})
+    const [downloading, setDownloading] = useState({animation: false, failed: 'w'})
 
+    LogBox.ignoreLogs([
+        'Non-serializable values were found in the navigation state',
+    ]);
 
     useEffect(() => {
         (async () => {
@@ -90,7 +93,7 @@ export default function AudioPlayerScreen({route}) {
             shouldCorrectPitch: true
         }
         const {sound, status} = await Audio.Sound.createAsync(
-            {uri: currPlaylist[currAudioObject]?.audioUrl},
+            {uri: currPlaylist[index]?.audioUrl},
             initalStatus,
             onPlaybackStatusUpdate
         )
@@ -249,17 +252,19 @@ export default function AudioPlayerScreen({route}) {
     }
 
     const onDownload = async () => {
-        await setDownloading({animation: true, failed: false})
+        await setDownloading({animation: true, failed: 'w'})
         FileSystem.downloadAsync(
             currPlaylist[currAudioObject].audioUrl,
             FileSystem.documentDirectory + `${currPlaylist[currAudioObject].title}.mp3`
         )
             .then(({ uri }) => {
                 console.log('Finished downloading to ', uri);
+                setDownloading({animation: true, failed: uri})
+                fetchDownloaded()
             })
             .catch(error => {
                 console.error(error);
-                setDownloading({animation: false, failed: true})
+                setDownloading({animation: false, failed: ''})
             });
     }
 
@@ -273,7 +278,7 @@ export default function AudioPlayerScreen({route}) {
              <View style={styles.header}>
                 <AntDesign name="down" onPress={() => navigation.goBack()} size={24} color={Colors[theme].tabIconDefault} />
                 <View style={{flexDirection: 'row'}}>
-                    {(downloading.animation && !downloading.failed)?
+                    {(downloading.animation && downloading.failed)?
                         <LottieView
                             autoPlay={true}
                             ref={animation}

@@ -22,8 +22,8 @@ const AudioCard = ({
         if(type === 1)
             return ['transparent', Colors[theme].primary, Colors[theme].primary]
         else if(type === 2)
-            return ['transparent', 'dodgerblue', 'blue']
-        return ['transparent', 'red', 'firebrick']
+            return ['transparent', 'dodgerblue', 'dodgerblue']
+        return ['transparent', 'firebrick', 'firebrick']
     }
 
     return (
@@ -45,14 +45,9 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: scale(120),
         height: verticalScale(100),
-        elevation: 24,
         borderColor: 'gray',
         borderWidth: scale(2),
         borderRadius: scale(12),
-        shadowColor: 'white',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.8,
-        shadowRadius: 1,
         marginLeft: scale(20)
     },
     button: {flex: 1, width: scale(120), justifyContent: 'flex-end', height: '100%', borderBottomLeftRadius: 12, borderBottomRightRadius: 12, marginTop: -verticalScale(20)},

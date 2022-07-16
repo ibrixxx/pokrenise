@@ -39,23 +39,22 @@ export default function AudioScreen({ navigation }) {
     const [currPlaylist, setCurrPlaylist] = useRecoilState(currentPlaylist)
     const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
 
+    const fetchDownloaded = async () => {
+        const arr = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory).catch(e => console.log(e))
+        const result = {}
+        for(let i = 0; i<arr.length; i++) {
+            const info = await FileSystem.getInfoAsync(FileSystem.documentDirectory + arr[i]).catch(e => console.log(e))
+            result[arr[i]] = info
+        }
+        await setDownloaded(result)
+    }
 
     useEffect(() => {
-        (async () => {
-            const arr = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory).catch(e => console.log(e))
-            const result = {}
-            for(let i = 0; i<arr.length; i++) {
-                const info = await FileSystem.getInfoAsync(FileSystem.documentDirectory + arr[i]).catch(e => console.log(e))
-                result[arr[i]] = info
-            }
-            await setDownloaded(result)
-            console.log(result)
-        })()
+        fetchDownloaded().catch(e => console.log(e))
     }, [setDownloaded])
 
     useEffect(() => {
         if(data) {
-            // console.log(data)
             let musicArr = []
             let motivationArr = []
             let podcastsArr = []
@@ -91,11 +90,11 @@ export default function AudioScreen({ navigation }) {
             pressedPlaylist = audio.motivation
         }
         if(currAudioInstance !== null && sound.audioUrl === pressedPlaylist[currAudioObject]?.audioUrl) {
-            navigation.navigate('AudioPlayer', {pressedSound: null})
+            navigation.navigate('AudioPlayer', {pressedSound: null, fetchDownloaded})
         }
         else {
             setCurrAudioObject(index)
-            navigation.navigate('AudioPlayer', {pressedSound: sound})
+            navigation.navigate('AudioPlayer', {pressedSound: sound, fetchDownloaded})
         }
     }
 
@@ -125,9 +124,9 @@ export default function AudioScreen({ navigation }) {
                 }
             >
                 <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: scale(20)}}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Downloads')} style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Downloads', {fetchDownloaded})} style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
                         <LinearGradient
-                            colors={[Colors[theme].primary, 'black']}
+                            colors={[Colors[theme].primary, 'white']}
                             style={styles.playlistGradient}
                             end={{x: 0.25, y: 0.85}}
                         >
@@ -137,7 +136,7 @@ export default function AudioScreen({ navigation }) {
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
                         <LinearGradient
-                            colors={[Colors[theme].primary, 'black']}
+                            colors={[Colors[theme].primary, 'white']}
                             style={styles.playlistGradient}
                             end={{x: 0.25, y: 0.85}}
                         >
@@ -146,8 +145,8 @@ export default function AudioScreen({ navigation }) {
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
-                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginTop: verticalScale(14)}}>
-                    <Title colors={['transparent', Colors[theme].primary]}>
+                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginTop: verticalScale(22)}}>
+                    <Title onPress={() => navigation.navigate('Playlist', {playlist: data.motivation, title: 'motivakcija'})} colors={['transparent', Colors[theme].primary]}>
                         motivakcija
                     </Title>
                 </View>
@@ -161,7 +160,7 @@ export default function AudioScreen({ navigation }) {
                 />
 
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title colors={['transparent', 'dodgerblue']}>
+                    <Title onPress={() => navigation.navigate('Playlist', {playlist: data.motivation, title: 'muzika'})} colors={['transparent', 'dodgerblue']}>
                         muzika
                     </Title>
                 </View>
@@ -175,7 +174,7 @@ export default function AudioScreen({ navigation }) {
                 />
 
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title colors={['transparent', 'firebrick']}>
+                    <Title onPress={() => navigation.navigate('Playlist', {playlist: data.motivation, title: 'podcasti'})} colors={['transparent', 'firebrick']}>
                         podcasti
                     </Title>
                 </View>
@@ -214,7 +213,7 @@ const styles = StyleSheet.create({
     playlistButton: {
         borderWidth: scale(1),
         borderRadius: scale(12),
-        width: '40%',
+        width: '48%',
         height: verticalScale(40),
     },
     playlistGradient: {
