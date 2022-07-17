@@ -26,7 +26,7 @@ import LottieView from 'lottie-react-native';
 export default function AudioPlayerScreen({route}) {
     const theme = 'dark' //useColorScheme()
     const navigation = useNavigation()
-    const { pressedSound, fetchDownloaded } = route.params
+    const { pressedSound, fetchDownloaded, fromDownloaded } = route.params
     const animation = useRef(null);
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
@@ -48,7 +48,11 @@ export default function AudioPlayerScreen({route}) {
 
     useEffect(() => {
         (async () => {
-            if(pressedSound?.audioUrl === currPlaylist[currAudioObject]?.audioUrl) {
+            const condition = fromDownloaded?
+                pressedSound?.title === currPlaylist[currAudioObject]
+                :
+                pressedSound?.audioUrl === currPlaylist[currAudioObject]?.audioUrl
+            if(condition) {
                 try {
                     await loadPlaybackInstance(true, currAudioObject)
                 }
@@ -92,8 +96,9 @@ export default function AudioPlayerScreen({route}) {
             isLooping: currPlaybackOption === playbackOptions[1],
             shouldCorrectPitch: true
         }
+        const uri = fromDownloaded? downloaded[currPlaylist[index]]?.uri : currPlaylist[index]?.audioUrl
         const {sound, status} = await Audio.Sound.createAsync(
-            {uri: currPlaylist[index]?.audioUrl},
+            {uri: uri},
             initalStatus,
             onPlaybackStatusUpdate
         )
@@ -114,7 +119,7 @@ export default function AudioPlayerScreen({route}) {
         try {
             await loadPlaybackInstance(true, (currAudioObject + 1) % currPlaylist.length)
         }
-        catch (e){
+        catch (e) {
             console.log(e)
         }
     }
@@ -269,8 +274,14 @@ export default function AudioPlayerScreen({route}) {
     }
 
     const isDownloaded = () => {
+        if(fromDownloaded)
+            return true
         const downloadedArr = Object.keys(downloaded)
         return downloadedArr.includes(currPlaylist[currAudioObject].title+'.mp3')
+    }
+
+    const getImageSource = () => {
+        return fromDownloaded? require('../assets/images/motiv.png') : {uri: currPlaylist[currAudioObject]?.imageUrl}
     }
 
     return (
@@ -300,7 +311,7 @@ export default function AudioPlayerScreen({route}) {
                             <AntDesign onPress={onDownload} name="download" size={24} style={{paddingHorizontal: scale(10)}} color={Colors[theme].primary}/>
                     }
 
-                    <AntDesign onPress={onShare} name="sharealt" size={24} style={{paddingHorizontal: scale(10)}} color={Colors[theme].primary} />
+                    {!fromDownloaded && <AntDesign onPress={onShare} name="sharealt" size={24} style={{paddingHorizontal: scale(10)}} color={Colors[theme].primary}/>}
                 </View>
             </View>
             <View style={{flex: 0.5, width: '90%', alignItems: 'center'}}>
@@ -312,15 +323,15 @@ export default function AudioPlayerScreen({route}) {
                     marqueeDelay={1000}
                     scrollSpeed={14}
                 >
-                    {currPlaylist[currAudioObject]?.title}
+                    {fromDownloaded? currPlaylist[currAudioObject] : currPlaylist[currAudioObject]?.title}
                 </TextTicker>
             </View>
             <Pressable onPress={() => toggleDesc(true)} disabled={desc} style={styles.audioImage}>
-                <Image source={{uri: currPlaylist[currAudioObject]?.imageUrl}} style={{width: '90%', height: '100%'}} />
+                <Image source={getImageSource()} style={{width: '90%', height: '100%'}} />
                 {
                     desc &&
                     <ScrollView style={styles.scrollViewDesc} contentContainerStyle={styles.scrollViewContent}>
-                        <Text style={styles.desc}>{currPlaylist[currAudioObject]?.description}</Text>
+                        <Text style={styles.desc}>{fromDownloaded? currPlaylist[currAudioObject] : currPlaylist[currAudioObject]?.description}</Text>
                     </ScrollView>
                 }
                 {
