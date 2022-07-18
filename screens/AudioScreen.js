@@ -81,20 +81,16 @@ export default function AudioScreen({ navigation }) {
     }, [data])
 
     const handleOnPress = async (sound, index) => {
-        let pressedPlaylist = []
         if(sound.type === 'muzika') {
             await setCurrPlaylist(audio.music)
-            pressedPlaylist = audio.music
         }
         else if(sound.type === 'podcast') {
             await setCurrPlaylist(audio.podcasts)
-            pressedPlaylist = audio.podcasts
         }
         else {
             await setCurrPlaylist(audio.motivation)
-            pressedPlaylist = audio.motivation
         }
-        if(currAudioInstance !== null && sound.audioUrl === pressedPlaylist[currAudioObject]?.audioUrl) {
+        if(currAudioInstance !== null && sound.audioUrl === currPlaylist[currAudioObject]?.audioUrl) {
             navigation.navigate('AudioPlayer', {pressedSound: null, fetchDownloaded, fromDownloaded: false})
         }
         else {
@@ -158,7 +154,8 @@ export default function AudioScreen({ navigation }) {
                 </View>
                 <FlatList
                     horizontal={true}
-                    data={audio.motivation}
+                    data={audio.motivation.slice(0, 6)}
+                    contentContainerStyle={{paddingRight: scale(20)}}
                     showsHorizontalScrollIndicator={false}
                     renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={1}/>}
                     keyExtractor={item => item._id}
@@ -172,7 +169,8 @@ export default function AudioScreen({ navigation }) {
                 </View>
                 <FlatList
                     horizontal={true}
-                    data={audio.music}
+                    data={audio.music.slice(0, 6)}
+                    contentContainerStyle={{paddingRight: scale(20)}}
                     showsHorizontalScrollIndicator={false}
                     renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={2}/>}
                     keyExtractor={item => item._id}
@@ -186,7 +184,8 @@ export default function AudioScreen({ navigation }) {
                 </View>
                 <FlatList
                     horizontal={true}
-                    data={audio.podcasts}
+                    data={audio.podcasts.slice(0, 6)}
+                    contentContainerStyle={{paddingRight: scale(20)}}
                     showsHorizontalScrollIndicator={false}
                     renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={3}/>}
                     keyExtractor={item => item._id}

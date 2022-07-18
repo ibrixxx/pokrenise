@@ -24,7 +24,7 @@ const PlaylistCard = ({sound, color, playlist, index, fetchDownloaded}) => {
     const onPress = async () => {
         if(currPlaylist !== playlist)
             await setCurrPlaylist(playlist)
-        if(currAudioInstance !== null && sound.audioUrl === playlist[currAudioObject]?.audioUrl) {
+        if(currAudioInstance !== null && sound.audioUrl === currPlaylist[currAudioObject]?.audioUrl) {
             navigation.navigate('AudioPlayer', {pressedSound: null, fetchDownloaded, fromDownloaded: false})
         }
         else {

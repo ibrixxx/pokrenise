@@ -34,7 +34,7 @@ const DownloadedCard = ({title, uri, onDeleteFinish, downloadedPlaylist, index, 
     const onPress = async () => {
         if(currPlaylist !== downloadedPlaylist)
             await setCurrPlaylist(downloadedPlaylist)
-        if(currAudioInstance !== null && title === downloadedPlaylist[currAudioObject]) {
+        if(currAudioInstance !== null && title === currPlaylist[currAudioObject]) {
             navigation.navigate('AudioPlayer', {pressedSound: null, fetchDownloaded, fromDownloaded: true})
         }
         else {
