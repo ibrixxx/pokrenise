@@ -7,6 +7,7 @@ import {RecoilRoot, useRecoilState} from "recoil";
 import {useEffect} from "react";
 import {Audio, InterruptionModeAndroid, InterruptionModeIOS} from "expo-av";
 import Colors from "./constants/Colors";
+import { Provider as PaperProvider } from 'react-native-paper';
 
 
 export default function App() {
@@ -32,7 +33,9 @@ export default function App() {
         <StatusBar style={"light"} backgroundColor={Colors[colorScheme].background}/>
         <RecoilRoot>
             <ContextProvider>
-                <Navigation colorScheme={colorScheme}/>
+                <PaperProvider>
+                    <Navigation colorScheme={colorScheme}/>
+                </PaperProvider>
             </ContextProvider>
         </RecoilRoot>
       </SafeAreaProvider>

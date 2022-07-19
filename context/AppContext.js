@@ -15,8 +15,13 @@ const ContextProvider = ({children}) => {
     const [user, setUser] = useState({
         isLogged: false,
         token: null,
+        refreshToken: null,
+        uid: null,
+        email: null,
+        displayName: null,
+        photoUrl: null,
+        phoneNumber: null
     })
-
 
     return (
         <UserContext.Provider value={user}>
