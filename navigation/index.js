@@ -12,6 +12,7 @@ import ProfileScreen from "../screens/ProfileScreen";
 import LikedScreen from "../screens/LikedScreen";
 import DownloadedScreen from "../screens/DownloadedScreen";
 import PlaylistScreen from "../screens/PlaylistScreen";
+import AddUserDetails from "../screens/AddUserDetails";
 
 
 export default function Navigation({ colorScheme }) {
@@ -48,6 +49,15 @@ function AudioNavigator() {
             <Stack.Screen name="Downloads" component={DownloadedScreen} options={{ headerShown: false}} />
             <Stack.Screen name="Liked" component={LikedScreen} options={{ headerShown: false}} />
             <Stack.Screen name="Playlist" component={PlaylistScreen} options={{ headerShown: false}} />
+        </Stack.Navigator>
+    );
+}
+
+function ProfileNavigation() {
+    return (
+        <Stack.Navigator initialRouteName={'ProfileHome'}>
+            <Stack.Screen name="ProfileHome" component={ProfileScreen} options={{ headerShown: false}} />
+            <Stack.Screen name="AddUserDetails" component={AddUserDetails} options={{ headerShown: false}} />
         </Stack.Navigator>
     );
 }
@@ -93,7 +103,7 @@ function BottomTabNavigator() {
             />
             <BottomTab.Screen
                 name="Profile"
-                component={ProfileScreen}
+                component={ProfileNavigation}
                 options={{
                     tabBarLabel: () => null,
                     tabBarItemStyle: {paddingBottom: 5},

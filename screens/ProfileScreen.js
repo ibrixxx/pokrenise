@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {StyleSheet} from 'react-native';
 import {Text, View} from "../components/Themed";
 import {Button, TextInput} from "react-native-paper";
@@ -7,43 +7,59 @@ import {scale, verticalScale} from "react-native-size-matters";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import {auth} from "../firebase";
 import { useUserUpdate} from "../context/AppContext";
+import {useNavigation} from "@react-navigation/native";
 
 
 export default function ProfileScreen() {
     const theme = 'dark'
     const setUser = useUserUpdate()
+    const navigation = useNavigation()
 
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    const setUserData = res => {
-        setUser({
-            isLogged: true,
-            token: res.user.stsTokenManager.accessToken,
-            refreshToken: res.user.stsTokenManager.refreshToken,
-            uid: res.user.uid,
-            email: res.user.email,
-            displayName: res.user.displayName,
-            photoUrl: res.user.photoURL,
-            phoneNumber: res.user.phoneNumber
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                console.log(user)
+                setUserData(user)
+            } else {
+                setUserData()
+            }
         })
+        return unsubscribe
+    }, [])
+
+    const setUserData = user => {
+        if(user)
+            setUser({
+                isLogged: true,
+                token: user.stsTokenManager.accessToken,
+                refreshToken: user.stsTokenManager.refreshToken,
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                photoUrl: user.photoURL,
+                phoneNumber: user.phoneNumber
+            })
+        else
+            setUser({
+                isLogged: false,
+            })
     }
 
     const onRegister = () => {
         createUserWithEmailAndPassword(auth, email.trim(), password)
             .then(res => {
-                console.log(res)
-                setUserData(res)
+                navigation.replace('AddUserDetails', {auth: auth})
             })
             .catch(e => console.log(e))
     }
 
     const onLogin = () => {
-        console.log(email.trim() + '11')
         signInWithEmailAndPassword(auth, email.trim(), password)
             .then(res => {
-                console.log(res)
-                setUserData(res)
+                navigation.replace('AddUserDetails', {auth: auth})
             })
             .catch(e => console.log(e))
     }

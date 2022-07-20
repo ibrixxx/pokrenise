@@ -5,7 +5,7 @@
     "owner": "ibrahimmesan",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/nabildaniMozgovi.png",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/mot.png",
@@ -28,10 +28,6 @@
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
       "package": "com.ibrahimmesan.motivakcija"
     },
     "web": {
