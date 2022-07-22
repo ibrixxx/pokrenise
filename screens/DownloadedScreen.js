@@ -1,5 +1,5 @@
 import {FlatList, LogBox, SafeAreaView, StyleSheet} from 'react-native';
-import {useRecoilValue} from "recoil";
+import {useRecoilState} from "recoil";
 import {downloadedAudios} from "../atoms/AudioFunctions";
 import Colors from "../constants/Colors";
 import {Caption, Snackbar, Title} from "react-native-paper";
@@ -8,12 +8,12 @@ import DownloadedCard from "../components/DownloadedCard";
 import {LinearGradient} from "expo-linear-gradient";
 import {useState} from "react";
 import {View} from "../components/Themed";
+import {fetchDownloaded} from "../utils/fileSystem";
 
 
 export default function DownloadedScreen({route}) {
-    const downloaded = useRecoilValue(downloadedAudios)
+    const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
     const theme = 'dark'
-    const {fetchDownloaded} = route.params
     const [refreshing, setRefreshing] = useState(false)
     const [visible, setVisible] = useState(false)
 
@@ -23,12 +23,12 @@ export default function DownloadedScreen({route}) {
 
     const onRefresh = async () => {
         await setRefreshing(true)
-        await fetchDownloaded()
+        await fetchDownloaded(setDownloaded)
         await setRefreshing(false)
     }
 
     const onDeleteFinish = () => {
-        fetchDownloaded().catch(e => console.log(e))
+        fetchDownloaded(setDownloaded).catch(e => console.log(e))
         setVisible(true)
     }
 
@@ -58,7 +58,7 @@ export default function DownloadedScreen({route}) {
                         onDeleteFinish={() => onDeleteFinish()}
                         downloadedPlaylist={Object.keys(downloaded)}
                         index={index}
-                        fetchDownloaded={() => fetchDownloaded}
+                        fetchDownloaded={() => fetchDownloaded(setDownloaded)}
                     />}
                 keyExtractor={(item, index) => item+index}
                 onRefresh={() => onRefresh()}

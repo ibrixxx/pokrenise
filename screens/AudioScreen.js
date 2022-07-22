@@ -19,10 +19,10 @@ import {
     currentAudioObject,
     currentPlaylist, downloadedAudios,
 } from "../atoms/AudioFunctions";
-import * as FileSystem from "expo-file-system";
 import {AntDesign} from "@expo/vector-icons";
 import {LinearGradient} from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
+import {fetchDownloaded} from "../utils/fileSystem";
 
 export default function AudioScreen({ navigation }) {
     const theme = 'dark'
@@ -40,18 +40,9 @@ export default function AudioScreen({ navigation }) {
     const [currPlaylist, setCurrPlaylist] = useRecoilState(currentPlaylist)
     const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
 
-    const fetchDownloaded = async () => {
-        const arr = await FileSystem.readDirectoryAsync(FileSystem.documentDirectory).catch(e => console.log(e))
-        const result = {}
-        for(let i = 0; i<arr.length; i++) {
-            const info = await FileSystem.getInfoAsync(FileSystem.documentDirectory + arr[i]).catch(e => console.log(e))
-            result[arr[i]] = info
-        }
-        await setDownloaded(result)
-    }
 
     useEffect(() => {
-        fetchDownloaded().then(() => {
+        fetchDownloaded(setDownloaded).then(() => {
             if(!loading)
                 setIsReady(true)
         }).catch(e => console.log(e))
@@ -91,11 +82,11 @@ export default function AudioScreen({ navigation }) {
             await setCurrPlaylist(audio.motivation)
         }
         if(currAudioInstance !== null && sound.audioUrl === currPlaylist[currAudioObject]?.audioUrl) {
-            navigation.navigate('AudioPlayer', {pressedSound: null, fetchDownloaded, fromDownloaded: false})
+            navigation.navigate('AudioPlayer', {pressedSound: null, fromDownloaded: false})
         }
         else {
             setCurrAudioObject(index)
-            navigation.navigate('AudioPlayer', {pressedSound: sound, fetchDownloaded, fromDownloaded: false})
+            navigation.navigate('AudioPlayer', {pressedSound: sound, fromDownloaded: false})
         }
     }
 
@@ -126,7 +117,7 @@ export default function AudioScreen({ navigation }) {
                 }
             >
                 <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: scale(20)}}>
-                    <TouchableOpacity onPress={() => navigation.navigate('Downloads', {fetchDownloaded})} style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Downloads')} style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
                         <LinearGradient
                             colors={[Colors[theme].primary, 'white']}
                             style={styles.playlistGradient}
@@ -148,7 +139,7 @@ export default function AudioScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginTop: verticalScale(22)}}>
-                    <Title onPress={() => navigation.navigate('Playlist', {title: 'motivakcija', playlist: audio.motivation, refetch, color: Colors[theme].primary, fetchDownloaded})} colors={['transparent', Colors[theme].primary]}>
+                    <Title onPress={() => navigation.navigate('Playlist', {title: 'motivakcija', playlist: audio.motivation, refetch, color: Colors[theme].primary, setDownloaded})} colors={['transparent', Colors[theme].primary]}>
                         motivakcija
                     </Title>
                 </View>
@@ -163,7 +154,7 @@ export default function AudioScreen({ navigation }) {
                 />
 
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.music, title: 'muzika', refetch, color: 'dodgerblue', fetchDownloaded})} colors={['transparent', 'dodgerblue']}>
+                    <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.music, title: 'muzika', refetch, color: 'dodgerblue', setDownloaded})} colors={['transparent', 'dodgerblue']}>
                         muzika
                     </Title>
                 </View>
@@ -178,7 +169,7 @@ export default function AudioScreen({ navigation }) {
                 />
 
                 <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.podcasts, title: 'podcasti', refetch, color: 'firebrick', fetchDownloaded})} colors={['transparent', 'firebrick']}>
+                    <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.podcasts, title: 'podcasti', refetch: refetch, color: 'firebrick', setDownloaded})} colors={['transparent', 'firebrick']}>
                         podcasti
                     </Title>
                 </View>

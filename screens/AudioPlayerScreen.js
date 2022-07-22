@@ -21,20 +21,21 @@ import {playbackOptions} from "../utils/playbackOptions";
 import {_getMMSSFromMillis} from "../utils/millisecondFormater";
 import {Audio} from "expo-av";
 import LottieView from 'lottie-react-native';
+import {fetchDownloaded} from "../utils/fileSystem";
 
 
 export default function AudioPlayerScreen({route}) {
     const theme = 'dark' //useColorScheme()
     const navigation = useNavigation()
-    const { pressedSound, fetchDownloaded, fromDownloaded } = route.params
+    const { pressedSound, fromDownloaded } = route.params
     const animation = useRef(null);
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const [currAudioInstance, setCurrAudioInstance] = useRecoilState(currentAudioInstance)
     const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
+    const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
     const currPlaylist = useRecoilValue(currentPlaylist)
-    const downloaded = useRecoilValue(downloadedAudios)
 
     const [liked, setLiked] = useState(false)
     const [speed, setSpeed] = useState(1.0)
@@ -265,7 +266,7 @@ export default function AudioPlayerScreen({route}) {
             .then(({ uri }) => {
                 console.log('Finished downloading to ', uri);
                 setDownloading({animation: true, failed: uri})
-                fetchDownloaded()
+                fetchDownloaded(setDownloaded)
             })
             .catch(error => {
                 console.error(error);

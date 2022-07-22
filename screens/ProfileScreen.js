@@ -51,18 +51,18 @@ export default function ProfileScreen() {
     const onRegister = () => {
         createUserWithEmailAndPassword(auth, email.trim(), password)
             .then(res => {
-                navigation.replace('AddUserDetails', {auth: auth})
+                navigation.replace('AddUserDetails')
             })
             .catch(e => console.log(e))
     }
 
     const onLogin = () => {
         return navigation.replace('AddUserDetails', {auth: auth})
-        signInWithEmailAndPassword(auth, email.trim(), password)
-            .then(res => {
-                navigation.replace('AddUserDetails', {auth: auth})
-            })
-            .catch(e => console.log(e))
+        // signInWithEmailAndPassword(auth, email.trim(), password)
+        //     .then(res => {
+        //         navigation.replace('AddUserDetails')
+        //     })
+        //     .catch(e => console.log(e))
     }
 
     return (

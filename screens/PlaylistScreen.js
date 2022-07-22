@@ -5,11 +5,12 @@ import {scale} from "react-native-size-matters";
 import {LinearGradient} from "expo-linear-gradient";
 import {useState} from "react";
 import PlaylistCard from "../components/PlaylistCard";
+import {fetchDownloaded} from "../utils/fileSystem";
 
 
 export default function PlaylistScreen({route}) {
     const theme = 'dark'
-    const {title, playlist, refetch, color, fetchDownloaded} = route.params
+    const {title, playlist, refetch, color, setDownloaded} = route.params
     const [refreshing, setRefreshing] = useState(false)
 
     LogBox.ignoreLogs([
@@ -47,7 +48,7 @@ export default function PlaylistScreen({route}) {
                         color={color}
                         playlist={playlist}
                         index={index}
-                        fetchDownloaded={fetchDownloaded}
+                        fetchDownloaded={() => fetchDownloaded(setDownloaded)}
                     />
                 }
                 keyExtractor={(item, index) => item+index}
