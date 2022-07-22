@@ -57,6 +57,7 @@ export default function ProfileScreen() {
     }
 
     const onLogin = () => {
+        return navigation.replace('AddUserDetails', {auth: auth})
         signInWithEmailAndPassword(auth, email.trim(), password)
             .then(res => {
                 navigation.replace('AddUserDetails', {auth: auth})
