@@ -1022,6 +1022,13 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@babel/runtime@^7.16.7":
+  version "7.18.9"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.18.9.tgz#b4fcfce55db3d2e5e080d2490f608a3b9f407f4a"
+  integrity sha512-lkqXDcvlFT5rvEjiu6+QYO+1GXrEHRo2LOtS7E4GtX5ESIZOgepqsZBVIj6Pv+a6zqsya9VCgiK1KAK4BvJDAw==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 "@babel/template@^7.0.0", "@babel/template@^7.16.7":
   version "7.16.7"
   resolved "https://registry.yarnpkg.com/@babel/template/-/template-7.16.7.tgz#8d126c8701fde4d66b264b3eba3d96f07666d155"
@@ -6803,6 +6810,14 @@ rimraf@~2.6.2:
   integrity sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==
   dependencies:
     glob "^7.1.3"
+
+rn-emoji@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/rn-emoji/-/rn-emoji-1.0.4.tgz#842daa12f8bc5343474926f23ae6d51a1a91edaf"
+  integrity sha512-whyJKkgPm6mq1st0I5+3XUwLQDVuGJf+a1x4xhAWYTQmPlEk5utbvucWj9FBDShN0Xbde43n4OYA69gHGwdlOg==
+  dependencies:
+    "@babel/runtime" "^7.16.7"
+    prop-types "^15.6.0"
 
 run-parallel@^1.1.9:
   version "1.2.0"
