@@ -10,7 +10,7 @@ import AppIntroSlider from "react-native-app-intro-slider";
 import {auth} from "../firebase";
 import ColorPicker from "react-native-wheel-color-picker";
 import EmojiSelector from "react-native-emoji-selector";
-import { Picker } from 'rn-emoji'
+import { updateProfile } from "firebase/auth";
 
 
 const AddUserDetails = ({navigation}) => {
@@ -64,7 +64,13 @@ const AddUserDetails = ({navigation}) => {
     }
 
     const onConfirm = () => {
-        auth.signOut().then(() => navigation.replace('ProfileHome')).catch(e => console.log(e))
+        updateProfile(auth.currentUser, {
+            displayName: nick.toLowerCase(), photoURL: selectedColors.toString() + ',' + emoji
+        }).then(() => {
+            navigation.replace('ProfileHome')
+        }).catch((error) => {
+            console.log(error)
+        });
     }
 
     const slides = [
@@ -86,7 +92,7 @@ const AddUserDetails = ({navigation}) => {
         if(item.id === 0)
             return (
                 <View style={styles.container}>
-                    <Title style={[styles.title, {color: Colors[theme].text, width: '100%', fontSize: scale(27), flex: 1}]}>{item.title}</Title>
+                    <Title style={[styles.title, {color: Colors[theme].tabIconDefault, width: '100%', fontSize: scale(27), flex: 1}]}>{item.title}</Title>
                     <View style={{width: '100%', justifyContent: 'center', flex: 4}}>
                     <TextInput
                         mode={'outlined'}
@@ -97,7 +103,7 @@ const AddUserDetails = ({navigation}) => {
                         activeOutlineColor={Colors[theme].primary}
                         outlineColor={Colors[theme].tabIconDefault}
                         onChangeText={text => {
-                            formatNick(text)
+                            formatNick(text.replace(/\s/g, ''))
                         }}
                         theme={{ colors: { text: Colors[theme].text, placeholder: Colors[theme].tabIconDefault }}}
                     />
@@ -108,7 +114,7 @@ const AddUserDetails = ({navigation}) => {
         else if(item.id === 1)
             return (
                 <View style={styles.container}>
-                    <Title style={[styles.title, {color: Colors[theme].text, width: '100%', fontSize: scale(27), flex: 1}]}>{item.title}</Title>
+                    <Title style={[styles.title, {color: Colors[theme].tabIconDefault, width: '100%', fontSize: scale(27), flex: 1}]}>{item.title}</Title>
                     <View style={{width: '100%', alignItems: 'center', flex: 4}}>
                         <View style={styles.profileOutline}>
                             <LinearGradient
@@ -145,7 +151,7 @@ const AddUserDetails = ({navigation}) => {
             )
         return (
             <View style={styles.container}>
-                <Title style={[styles.title, {color: Colors[theme].text, width: '100%', fontSize: scale(33), flex: 1}]}>{item.title}</Title>
+                <Title style={[styles.title, {color: Colors[theme].tabIconDefault, width: '100%', fontSize: scale(33), flex: 1}]}>{item.title}</Title>
                 <View style={{width: '100%', alignItems: 'center', flex: 4}}>
                     <View style={styles.profileOutline}>
                         <LinearGradient
@@ -162,7 +168,8 @@ const AddUserDetails = ({navigation}) => {
     }
 
     const nextButton = () => (
-        <Button disabled={nick.length < 2} uppercase={false} style={styles.button} mode="contained" color={Colors[theme].primary}>
+        nick.length < 2 ? null :
+        <Button uppercase={false} style={styles.button} mode="contained" color={Colors[theme].primary}>
             <Text style={[styles.title, {color: Colors[theme].text}]}>aj dalje</Text>
         </Button>
     )
