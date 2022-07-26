@@ -11,12 +11,15 @@ import {auth} from "../firebase";
 import ColorPicker from "react-native-wheel-color-picker";
 import EmojiSelector from "react-native-emoji-selector";
 import { updateProfile } from "firebase/auth";
+import {useUser} from "../context/AppContext";
 
 
-const AddUserDetails = ({navigation}) => {
+const AddUserDetails = ({navigation, route}) => {
     const theme = 'dark'
 
+    const email = route.params.email
     const picker = useRef(null)
+    const user = useUser()
 
     const [nick, setNick] = React.useState("");
     const [emoji, setEmoji] = React.useState('🧠');
@@ -74,6 +77,10 @@ const AddUserDetails = ({navigation}) => {
     }
 
     const slides = [
+        // {
+        //     id: -1,
+        //     title: "verifikujte uneseni email klikom na link poslat na " + email
+        // },
         {
             id: 0,
             title: "napravite svoj @"
@@ -89,12 +96,26 @@ const AddUserDetails = ({navigation}) => {
     ]
 
     const renderItem = ({item}) => {
-        if(item.id === 0)
+        if(item.id === -1 && !auth.currentUser.emailVerified) {
+            console.log(auth.currentUser.emailVerified)
+            return (
+                <View style={styles.container}>
+                    <Title style={[styles.title, {
+                        color: Colors[theme].tabIconDefault,
+                        width: '100%',
+                        fontSize: scale(27),
+                        flex: 1
+                    }]}>{item.title}</Title>
+                </View>
+            )
+        }
+        else if(item.id === 0)
             return (
                 <View style={styles.container}>
                     <Title style={[styles.title, {color: Colors[theme].tabIconDefault, width: '100%', fontSize: scale(27), flex: 1}]}>{item.title}</Title>
                     <View style={{width: '100%', justifyContent: 'center', flex: 4}}>
                     <TextInput
+                        autoCapitalize={'none'}
                         mode={'outlined'}
                         style={[styles.input, {backgroundColor: Colors[theme].background}]}
                         label="@"
