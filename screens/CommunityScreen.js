@@ -7,7 +7,7 @@ import {scale, verticalScale} from "react-native-size-matters";
 import {DataTable} from "react-native-paper";
 import Colors from "../constants/Colors";
 
-const optionsPerPage = [2, 3, 4];
+const itemsPerPage = 10
 
 const fakeData = [
     {name: '@username', steps: 12404},
@@ -32,7 +32,13 @@ export default function CommunityScreen() {
     const [pasteStepsCount, setPasteStepsCount] = useState(0)
     const [currentStepsCount, setCurrentStepsCount] = useState(0)
     const [page, setPage] = useState(0)
-    const [itemsPerPage, setItemsPerPage] = useState(optionsPerPage[0])
+    const [contestants, setContestants] = useState(fakeData)
+
+    useEffect(
+        useCallback(() => {
+            setContestants(fakeData.sort((a, b) => a.steps < b.steps))
+        }, [contestants])
+    )
 
     // useEffect(
     //     useCallback(() => {
@@ -58,11 +64,11 @@ export default function CommunityScreen() {
                     <DataTable.Title style={{flex: 0.3}} numeric>koraci</DataTable.Title>
                 </DataTable.Header>
                 {
-                    fakeData
-                        .sort((a, b) => a.steps < b.steps)
+                    contestants
+                        .slice(page * itemsPerPage, page * itemsPerPage + itemsPerPage)
                         .map((item, i) =>
-                            (<DataTable.Row style={{flex: 1}} key={i}>
-                                <DataTable.Cell style={{flex: 0.1}}>{i+1}.</DataTable.Cell>
+                            (<DataTable.Row key={i}>
+                                <DataTable.Cell style={{flex: 0.1}}>{page * itemsPerPage + i + 1}.</DataTable.Cell>
                                 <DataTable.Cell style={{flex: 0.6}}>{item.name}</DataTable.Cell>
                                 <DataTable.Cell style={{flex: 0.3}} numeric>{item.steps}</DataTable.Cell>
                             </DataTable.Row>)
@@ -73,9 +79,8 @@ export default function CommunityScreen() {
                     page={page}
                     numberOfPages={3}
                     onPageChange={(page) => setPage(page)}
-                    label={`page ${page+1}`}
+                    label={`page ${page + 1}`}
                     itemsPerPage={itemsPerPage}
-                    setItemsPerPage={setItemsPerPage}
                     showFastPagination
                 />
             </DataTable>
