@@ -1,10 +1,10 @@
-import React from 'react';
+import React, {useRef} from 'react';
 import {
-    FlatList,
+    FlatList, Image, Pressable,
     RefreshControl,
     SafeAreaView,
     ScrollView,
-    StyleSheet, TouchableOpacity
+    StyleSheet, TouchableOpacity, useWindowDimensions
 } from 'react-native';
 import { Text, View, Title } from '../components/Themed';
 import {useEffect, useState} from "react";
@@ -19,14 +19,19 @@ import {
     currentAudioObject,
     currentPlaylist, downloadedAudios,
 } from "../atoms/AudioFunctions";
-import {AntDesign} from "@expo/vector-icons";
+import {AntDesign, Ionicons} from "@expo/vector-icons";
 import {LinearGradient} from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import {fetchDownloaded} from "../utils/fileSystem";
+import Carousel, {Pagination} from 'react-native-snap-carousel';
+
 
 export default function AudioScreen({ navigation }) {
     const theme = 'dark'
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
+    const { width, height } = useWindowDimensions();
+    const carouselRef = useRef(null)
+
     const [audio, setAudio] = useState({
         music: [],
         motivation: [],
@@ -39,7 +44,6 @@ export default function AudioScreen({ navigation }) {
     const currAudioInstance = useRecoilValue(currentAudioInstance)
     const [currPlaylist, setCurrPlaylist] = useRecoilState(currentPlaylist)
     const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
-
 
     useEffect(() => {
         fetchDownloaded(setDownloaded).then(() => {
@@ -103,12 +107,26 @@ export default function AudioScreen({ navigation }) {
                         source={require('../assets/gif/muscle.json')}
                     />
                 </View>
+
     if (error) return <View style={styles.container}><Text>Error!</Text></View>
 
+    const renderCarousel = item => {
+        return (
+            <Pressable style={{borderRadius: scale(14), overflow: 'hidden'}}>
+                <View style={{height: '80%', width: '100%'}}>
+                    <Ionicons style={{position: 'absolute', zIndex: 2, top: '44%', left: '44%'}} name="play-outline" size={44} color={Colors[theme].primary} />
+                    <Image source={{uri: item.imageUrl}} resizeMode={'cover'} style={{width: width * 0.9, height: '100%', zIndex: 1}} />
+                </View>
+                <View style={{width: '100%', height: '20%', backgroundColor: 'whitesmoke', flexDirection: 'row', alignItems: 'center'}}>
+                    <Text style={{color: Colors[theme].primary, fontWeight: 'bold', paddingLeft: scale(20)}}>{item.title}</Text>
+                </View>
+            </Pressable>
+        )
+    }
+
     return (
-        <SafeAreaView style={{flex: 1, paddingTop: scale(30), backgroundColor: Colors[theme].background}}>
+        <SafeAreaView style={{flex: 1, height: '100%', paddingTop: scale(30), backgroundColor: Colors[theme].background}}>
             <ScrollView
-                contentContainerStyle={styles.container}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -116,7 +134,8 @@ export default function AudioScreen({ navigation }) {
                     />
                 }
             >
-                <View style={{flex: 0.5, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: scale(20)}}>
+
+                <View style={{height: height * 0.14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: scale(20)}}>
                     <TouchableOpacity onPress={() => navigation.navigate('Downloads')} style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
                         <LinearGradient
                             colors={[Colors[theme].primary, 'white']}
@@ -138,50 +157,72 @@ export default function AudioScreen({ navigation }) {
                         </LinearGradient>
                     </TouchableOpacity>
                 </View>
-                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginTop: verticalScale(22)}}>
-                    <Title onPress={() => navigation.navigate('Playlist', {title: 'motivakcija', playlist: audio.motivation, refetch, color: Colors[theme].primary, setDownloaded})} colors={['transparent', Colors[theme].primary]}>
-                        motivakcija
-                    </Title>
-                </View>
-                <FlatList
-                    horizontal={true}
-                    data={audio.motivation.slice(0, 6)}
-                    contentContainerStyle={{paddingRight: scale(20)}}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={1}/>}
-                    keyExtractor={item => item._id}
-                    ListEmptyComponent={() => <Text>Nema podataka</Text>}
-                />
 
-                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.music, title: 'muzika', refetch, color: 'dodgerblue', setDownloaded})} colors={['transparent', 'dodgerblue']}>
-                        muzika
-                    </Title>
+                <View style={{height: height * 0.3, marginVertical: verticalScale(20)}}>
+                    <Carousel
+                        ref={carouselRef}
+                        data={data.result}
+                        renderItem={({item}) => renderCarousel(item)}
+                        sliderWidth={width}
+                        itemWidth={width * 0.8}
+                        layout={'default'}
+                        inactiveSlideOpacity={0.5}
+                    />
+                    <Pagination dotsLength={data.result.length} activeDotIndex={2} dotColor={'white'} />
                 </View>
-                <FlatList
-                    horizontal={true}
-                    data={audio.music.slice(0, 6)}
-                    contentContainerStyle={{paddingRight: scale(20)}}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={2}/>}
-                    keyExtractor={item => item._id}
-                    ListEmptyComponent={() => <Text>Nema podataka</Text>}
-                />
 
-                <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
-                    <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.podcasts, title: 'podcasti', refetch: refetch, color: 'firebrick', setDownloaded})} colors={['transparent', 'firebrick']}>
-                        podcasti
-                    </Title>
+                <View style={{width: '100%', height: height * 0.69}}>
+                    <View style={{marginBottom: verticalScale(14)}}>
+                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginTop: verticalScale(22)}}>
+                            <Title onPress={() => navigation.navigate('Playlist', {title: 'motivakcija', playlist: audio.motivation, refetch, color: Colors[theme].primary, setDownloaded})} colors={['transparent', Colors[theme].primary]}>
+                                motivakcija
+                            </Title>
+                        </View>
+                        <FlatList
+                            horizontal={true}
+                            data={audio.motivation.slice(0, 6)}
+                            contentContainerStyle={{paddingRight: scale(20)}}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={1}/>}
+                            keyExtractor={item => item._id}
+                            ListEmptyComponent={() => <Text>Nema podataka</Text>}
+                        />
+                    </View>
+
+                    <View style={{marginBottom: verticalScale(14)}}>
+                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                            <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.music, title: 'muzika', refetch, color: 'dodgerblue', setDownloaded})} colors={['transparent', 'dodgerblue']}>
+                                muzika
+                            </Title>
+                        </View>
+                        <FlatList
+                            horizontal={true}
+                            data={audio.music.slice(0, 6)}
+                            contentContainerStyle={{paddingRight: scale(20)}}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={2}/>}
+                            keyExtractor={item => item._id}
+                            ListEmptyComponent={() => <Text>Nema podataka</Text>}
+                        />
+                    </View>
+
+                    <View style={{marginBottom: verticalScale(14)}}>
+                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                            <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.podcasts, title: 'podcasti', refetch: refetch, color: 'firebrick', setDownloaded})} colors={['transparent', 'firebrick']}>
+                                podcasti
+                            </Title>
+                        </View>
+                        <FlatList
+                            horizontal={true}
+                            data={audio.podcasts.slice(0, 6)}
+                            contentContainerStyle={{paddingRight: scale(20)}}
+                            showsHorizontalScrollIndicator={false}
+                            renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={3}/>}
+                            keyExtractor={item => item._id}
+                            ListEmptyComponent={() => <Text>Nema podataka</Text>}
+                        />
+                    </View>
                 </View>
-                <FlatList
-                    horizontal={true}
-                    data={audio.podcasts.slice(0, 6)}
-                    contentContainerStyle={{paddingRight: scale(20)}}
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({item, index}) => <AudioCard handleOnPress={() => handleOnPress(item, index)} m={item} type={3}/>}
-                    keyExtractor={item => item._id}
-                    ListEmptyComponent={() => <Text>Nema podataka</Text>}
-                />
             </ScrollView>
         </SafeAreaView>
     );
@@ -189,7 +230,7 @@ export default function AudioScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1,
+        height: '100%',
     },
     sectionTitle: {
         width: '100%',
