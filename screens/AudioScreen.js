@@ -39,6 +39,7 @@ export default function AudioScreen({ navigation }) {
     })
     const [refreshing, setRefreshing] = React.useState(false);
     const [isReady, setIsReady] = React.useState(false);
+    const [activeIndex, setActiveIndex] = React.useState(0);
 
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const currAudioInstance = useRecoilValue(currentAudioInstance)
@@ -76,14 +77,16 @@ export default function AudioScreen({ navigation }) {
     }, [data])
 
     const handleOnPress = async (sound, index) => {
-        if(sound.type === 'muzika') {
-            await setCurrPlaylist(audio.music)
-        }
-        else if(sound.type === 'podcast') {
-            await setCurrPlaylist(audio.podcasts)
-        }
+        if(index === 0)
+            setCurrPlaylist([sound])
         else {
-            await setCurrPlaylist(audio.motivation)
+            if (sound.type === 'muzika') {
+                await setCurrPlaylist(audio.music)
+            } else if (sound.type === 'podcast') {
+                await setCurrPlaylist(audio.podcasts)
+            } else {
+                await setCurrPlaylist(audio.motivation)
+            }
         }
         if(currAudioInstance !== null && sound.audioUrl === currPlaylist[currAudioObject]?.audioUrl) {
             navigation.navigate('AudioPlayer', {pressedSound: null, fromDownloaded: false})
@@ -112,15 +115,15 @@ export default function AudioScreen({ navigation }) {
 
     const renderCarousel = item => {
         return (
-            <Pressable style={{borderRadius: scale(14), overflow: 'hidden'}}>
-                <View style={{height: '80%', width: '100%'}}>
+            <View style={{borderRadius: scale(14), overflow: 'hidden'}}>
+                <TouchableOpacity onPress={() => handleOnPress(item, 0)} style={{height: '80%', width: '100%'}}>
                     <Ionicons style={{position: 'absolute', zIndex: 2, top: '44%', left: '44%'}} name="play-outline" size={44} color={Colors[theme].primary} />
                     <Image source={{uri: item.imageUrl}} resizeMode={'cover'} style={{width: width * 0.9, height: '100%', zIndex: 1}} />
-                </View>
+                </TouchableOpacity>
                 <View style={{width: '100%', height: '20%', backgroundColor: 'whitesmoke', flexDirection: 'row', alignItems: 'center'}}>
                     <Text style={{color: Colors[theme].primary, fontWeight: 'bold', paddingLeft: scale(20)}}>{item.title}</Text>
                 </View>
-            </Pressable>
+            </View>
         )
     }
 
@@ -158,7 +161,7 @@ export default function AudioScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <View style={{height: height * 0.3, marginVertical: verticalScale(20)}}>
+                <View style={{height: height * 0.3, marginTop: verticalScale(20)}}>
                     <Carousel
                         ref={carouselRef}
                         data={data.result}
@@ -167,8 +170,16 @@ export default function AudioScreen({ navigation }) {
                         itemWidth={width * 0.8}
                         layout={'default'}
                         inactiveSlideOpacity={0.5}
+                        containerCustomStyle={{height: '80%'}}
+                        onSnapToItem={index => setActiveIndex(index)}
                     />
-                    <Pagination dotsLength={data.result.length} activeDotIndex={2} dotColor={'white'} />
+                    <Pagination
+                        dotsLength={data.result.length}
+                        activeDotIndex={activeIndex}
+                        dotColor={'#FFF'}
+                        inactiveDotColor={'gray'}
+                        containerStyle={{marginVertical: verticalScale(-10)}}
+                    />
                 </View>
 
                 <View style={{width: '100%', height: height * 0.69}}>
