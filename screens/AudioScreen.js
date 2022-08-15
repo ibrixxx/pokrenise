@@ -17,13 +17,15 @@ import {useRecoilState, useRecoilValue} from "recoil";
 import {
     currentAudioInstance,
     currentAudioObject,
-    currentPlaylist, downloadedAudios,
+    currentPlaylist, currentStatus, downloadedAudios,
 } from "../atoms/AudioFunctions";
-import {AntDesign, Ionicons} from "@expo/vector-icons";
+import {AntDesign, Entypo, Ionicons} from "@expo/vector-icons";
 import {LinearGradient} from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import {fetchDownloaded} from "../utils/fileSystem";
 import Carousel, {Pagination} from 'react-native-snap-carousel';
+import { Modalize } from 'react-native-modalize';
+
 
 
 export default function AudioScreen({ navigation }) {
@@ -31,6 +33,7 @@ export default function AudioScreen({ navigation }) {
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
     const { width, height } = useWindowDimensions();
     const carouselRef = useRef(null)
+    const modalizeRef = useRef(null)
 
     const [audio, setAudio] = useState({
         music: [],
@@ -43,6 +46,7 @@ export default function AudioScreen({ navigation }) {
 
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const currAudioInstance = useRecoilValue(currentAudioInstance)
+    const currStatus = useRecoilValue(currentStatus)
     const [currPlaylist, setCurrPlaylist] = useRecoilState(currentPlaylist)
     const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
 
@@ -95,7 +99,12 @@ export default function AudioScreen({ navigation }) {
             setCurrAudioObject(index)
             navigation.navigate('AudioPlayer', {pressedSound: sound, fromDownloaded: false})
         }
+        onOpen()
     }
+
+    const onOpen = () => {
+        modalizeRef.current?.open();
+    };
 
     if (loading && !isReady)
         return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -234,7 +243,24 @@ export default function AudioScreen({ navigation }) {
                         />
                     </View>
                 </View>
+                {/*<Modalize*/}
+                {/*    modalStyle={{height: '20%', width: width}}*/}
+                {/*    ref={modalizeRef}*/}
+                {/*    panGestureEnabled={true}*/}
+                {/*>*/}
+                {/*    */}
+                {/*</Modalize>*/}
             </ScrollView>
+            <Pressable style={{height: '8%', backgroundColor: '#222222', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row', width: '100%', paddingHorizontal: scale(20), borderTopLeftRadius: scale(14), borderTopRightRadius: scale(14)}}>
+                <Image source={require('../assets/images/rio-bg.jpeg')} style={{width: scale(55), height: '100%'}} resizeMode={'cover'} />
+                <Text>Naslov</Text>
+                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#222222'}}>
+                    <TouchableOpacity style={{marginRight: scale(10)}} onPress={() => console.log('ua')}>
+                        <Entypo name={currStatus?.isPlaying? "controller-paus":"controller-play"} size={30} color={Colors[theme].primary} />
+                    </TouchableOpacity>
+                    <AntDesign name="close" size={24} color="gray" />
+                </View>
+            </Pressable>
         </SafeAreaView>
     );
 }
