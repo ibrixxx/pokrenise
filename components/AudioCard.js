@@ -5,11 +5,7 @@ import { scale, verticalScale } from 'react-native-size-matters'
 import Colors from "../constants/Colors";
 import { LinearGradient } from 'expo-linear-gradient';
 
-const AudioCard = ({
-    handleOnPress,
-    m,
-    type
-}) => {
+const AudioCard = ({handleOnPress, m, type}) => {
     const theme = 'dark' //useColorScheme();
 
     const formatTitle = () => {

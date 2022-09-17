@@ -25,6 +25,7 @@ import LottieView from "lottie-react-native";
 import {fetchDownloaded} from "../utils/fileSystem";
 import Carousel, {Pagination} from 'react-native-snap-carousel';
 import { Modalize } from 'react-native-modalize';
+import NowPlaying from "../components/NowPlaying";
 
 
 
@@ -251,16 +252,9 @@ export default function AudioScreen({ navigation }) {
                 {/*    */}
                 {/*</Modalize>*/}
             </ScrollView>
-            <Pressable style={{height: '8%', backgroundColor: '#222222', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row', width: '100%', paddingHorizontal: scale(20), borderTopLeftRadius: scale(14), borderTopRightRadius: scale(14)}}>
-                <Image source={require('../assets/images/rio-bg.jpeg')} style={{width: scale(55), height: '100%'}} resizeMode={'cover'} />
-                <Text>Naslov</Text>
-                <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#222222'}}>
-                    <TouchableOpacity style={{marginRight: scale(10)}} onPress={() => console.log('ua')}>
-                        <Entypo name={currStatus?.isPlaying? "controller-paus":"controller-play"} size={30} color={Colors[theme].primary} />
-                    </TouchableOpacity>
-                    <AntDesign name="close" size={24} color="gray" />
-                </View>
-            </Pressable>
+            {
+                currAudioInstance !== null && <NowPlaying currStatus={currStatus}/>
+            }
         </SafeAreaView>
     );
 }
