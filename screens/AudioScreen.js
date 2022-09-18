@@ -23,9 +23,11 @@ import {AntDesign, Entypo, Ionicons} from "@expo/vector-icons";
 import {LinearGradient} from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import {fetchDownloaded} from "../utils/fileSystem";
-import Carousel, {Pagination} from 'react-native-snap-carousel';
 import { Modalize } from 'react-native-modalize';
 import NowPlaying from "../components/NowPlaying";
+import Carousel from 'react-native-reanimated-carousel';
+import {GestureHandlerRootView} from "react-native-gesture-handler";
+import {useSharedValue} from "react-native-reanimated";
 
 
 
@@ -43,7 +45,8 @@ export default function AudioScreen({ navigation }) {
     })
     const [refreshing, setRefreshing] = React.useState(false);
     const [isReady, setIsReady] = React.useState(false);
-    const [activeIndex, setActiveIndex] = React.useState(0);
+    // const [activeIndex, setActiveIndex] = React.useState(0);
+    const progressValue = useSharedValue(0);
 
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const currAudioInstance = useRecoilValue(currentAudioInstance)
@@ -125,14 +128,13 @@ export default function AudioScreen({ navigation }) {
 
     const renderCarousel = item => {
         return (
-            <View style={{borderRadius: scale(14), overflow: 'hidden'}}>
-                <TouchableOpacity onPress={() => handleOnPress(item, 0)} style={{height: '80%', width: '100%'}}>
-                    <Ionicons style={{position: 'absolute', zIndex: 2, top: '44%', left: '44%'}} name="play-outline" size={44} color={Colors[theme].primary} />
-                    <Image source={{uri: item.imageUrl}} resizeMode={'cover'} style={{width: width * 0.9, height: '100%', zIndex: 1}} />
+            <View style={{flex: 1, borderRadius: scale(14), overflow: 'hidden', justifyContent: 'center', alignItems: 'center', width: width }}>
+                <TouchableOpacity onPress={() => handleOnPress(item, 0)} style={{height: '100%', width: width * 0.9}}>
+                    <Image source={{uri: item.imageUrl}} resizeMode={'cover'} style={{width: width * 0.9, height: '80%', zIndex: 1}} />
+                    <View style={{width: width * 0.9, height: '20%', backgroundColor: 'whitesmoke', flexDirection: 'row', alignItems: 'center'}}>
+                        <Text style={{color: Colors[theme].primary, fontWeight: 'bold', paddingLeft: scale(20)}}>{item.title}</Text>
+                    </View>
                 </TouchableOpacity>
-                <View style={{width: '100%', height: '20%', backgroundColor: 'whitesmoke', flexDirection: 'row', alignItems: 'center'}}>
-                    <Text style={{color: Colors[theme].primary, fontWeight: 'bold', paddingLeft: scale(20)}}>{item.title}</Text>
-                </View>
             </View>
         )
     }
@@ -171,26 +173,31 @@ export default function AudioScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <View style={{height: height * 0.3, marginTop: verticalScale(20)}}>
+                <GestureHandlerRootView style={{width: width, height: height * 0.3, marginTop: verticalScale(20), justifyContent: 'center', alignItems: 'center'}}>
                     <Carousel
+                        loop
                         ref={carouselRef}
+                        width={width}
+                        height={height * 0.3}
                         data={data.result}
-                        renderItem={({item}) => renderCarousel(item)}
-                        sliderWidth={width}
-                        itemWidth={width * 0.8}
-                        layout={'default'}
-                        inactiveSlideOpacity={0.5}
-                        containerCustomStyle={{height: '80%'}}
-                        onSnapToItem={index => setActiveIndex(index)}
+                        autoPlay={true}
+                          defaultIndex={data.result.length/2}
+                        scrollAnimationDuration={1000}
+                        onProgressChange={(_, absoluteProgress) =>
+                            (progressValue.value = absoluteProgress)
+                        }
+                        mode="parallax"
+                        modeConfig={{
+                            parallaxScrollingScale: 0.9,
+                            parallaxScrollingOffset: 50,
+                        }}
+                        onSnapToItem={(index) => {
+                            // carouselRef?.current?.scrollTo(index)
+                            console.log(index)
+                        }}
+                        renderItem={({item, index }) => renderCarousel(item)}
                     />
-                    <Pagination
-                        dotsLength={data.result.length}
-                        activeDotIndex={activeIndex}
-                        dotColor={'#FFF'}
-                        inactiveDotColor={'gray'}
-                        containerStyle={{marginVertical: verticalScale(-10)}}
-                    />
-                </View>
+                </GestureHandlerRootView>
 
                 <View style={{width: '100%', height: height * 0.69}}>
                     <View style={{marginBottom: verticalScale(14)}}>
