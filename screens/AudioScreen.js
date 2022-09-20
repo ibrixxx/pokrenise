@@ -26,9 +26,18 @@ import {fetchDownloaded} from "../utils/fileSystem";
 import { Modalize } from 'react-native-modalize';
 import NowPlaying from "../components/NowPlaying";
 import Carousel from 'react-native-reanimated-carousel';
-import {GestureHandlerRootView} from "react-native-gesture-handler";
-import {useSharedValue} from "react-native-reanimated";
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    interpolate,
+    withTiming,
+    Extrapolate, interpolateColor
+} from "react-native-reanimated";
 
+
+const PAGE_WIDTH = 60;
+const PAGE_HEIGHT = 40;
+const DATA = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
 
 
 export default function AudioScreen({ navigation }) {
@@ -45,8 +54,7 @@ export default function AudioScreen({ navigation }) {
     })
     const [refreshing, setRefreshing] = React.useState(false);
     const [isReady, setIsReady] = React.useState(false);
-    // const [activeIndex, setActiveIndex] = React.useState(0);
-    const progressValue = useSharedValue(0);
+    const r = React.useRef(null);
 
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const currAudioInstance = useRecoilValue(currentAudioInstance)
@@ -128,7 +136,7 @@ export default function AudioScreen({ navigation }) {
 
     const renderCarousel = item => {
         return (
-            <View style={{flex: 1, borderRadius: scale(14), overflow: 'hidden', justifyContent: 'center', alignItems: 'center', width: width }}>
+            <View style={{flex: 1, borderRadius: scale(14), overflow: 'hidden', justifyContent: 'center', alignItems: 'center', width: width * 0.5 }}>
                 <TouchableOpacity onPress={() => handleOnPress(item, 0)} style={{height: '100%', width: width * 0.9}}>
                     <Image source={{uri: item.imageUrl}} resizeMode={'cover'} style={{width: width * 0.9, height: '80%', zIndex: 1}} />
                     <View style={{width: width * 0.9, height: '20%', backgroundColor: 'whitesmoke', flexDirection: 'row', alignItems: 'center'}}>
@@ -173,31 +181,38 @@ export default function AudioScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <GestureHandlerRootView style={{width: width, height: height * 0.3, marginTop: verticalScale(20), justifyContent: 'center', alignItems: 'center'}}>
+                <View style={{flex: 1, width: width, height: height * 0.081, justifyContent: 'center', alignItems: 'center'}}>
                     <Carousel
-                        loop
-                        ref={carouselRef}
-                        width={width}
-                        height={height * 0.3}
-                        data={data.result}
+                        ref={r}
+                        loop={true}
+                        style={{
+                            width: width,
+                            height: PAGE_HEIGHT,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            borderBottomWidth: 1,
+                            borderBottomColor: '#0071fa',
+                        }}
+                        width={PAGE_WIDTH}
+                        height={PAGE_HEIGHT}
+                        data={DATA}
+                        renderItem={({ item, animationValue }) => {
+                            return (
+                                <Item
+                                    animationValue={animationValue}
+                                    label={item}
+                                    onPress={() =>
+                                        r.current?.scrollTo({
+                                            count: animationValue.value,
+                                            animated: true,
+                                        })
+                                    }
+                                />
+                            );
+                        }}
                         autoPlay={true}
-                          defaultIndex={data.result.length/2}
-                        scrollAnimationDuration={1000}
-                        onProgressChange={(_, absoluteProgress) =>
-                            (progressValue.value = absoluteProgress)
-                        }
-                        mode="parallax"
-                        modeConfig={{
-                            parallaxScrollingScale: 0.9,
-                            parallaxScrollingOffset: 50,
-                        }}
-                        onSnapToItem={(index) => {
-                            // carouselRef?.current?.scrollTo(index)
-                            console.log(index)
-                        }}
-                        renderItem={({item, index }) => renderCarousel(item)}
                     />
-                </GestureHandlerRootView>
+                </View>
 
                 <View style={{width: '100%', height: height * 0.69}}>
                     <View style={{marginBottom: verticalScale(14)}}>
@@ -260,7 +275,7 @@ export default function AudioScreen({ navigation }) {
                 {/*</Modalize>*/}
             </ScrollView>
             {
-                currAudioInstance !== null && <NowPlaying currStatus={currStatus}/>
+                currAudioInstance !== null && <NowPlaying />
             }
         </SafeAreaView>
     );
@@ -306,3 +321,75 @@ const styles = StyleSheet.create({
         marginLeft: scale(5)
     }
 });
+
+const Item = (props) => {
+    const { animationValue, label, onPress } = props;
+
+    const translateY = useSharedValue(0);
+
+    const containerStyle = useAnimatedStyle(() => {
+        const opacity = interpolate(
+            animationValue.value,
+            [-1, 0, 1],
+            [0.5, 1, 0.5],
+            Extrapolate.CLAMP
+        );
+
+        return {
+            opacity,
+        };
+    }, [animationValue]);
+
+    const labelStyle = useAnimatedStyle(() => {
+        const scale = interpolate(
+            animationValue.value,
+            [-1, 0, 1],
+            [1, 1.25, 1],
+            Extrapolate.CLAMP
+        );
+
+        const color = interpolateColor(
+            animationValue.value,
+            [-1, 0, 1],
+            ['#b6bbc0', '#0071fa', '#b6bbc0']
+        );
+
+        return {
+            transform: [{ scale }, { translateY: translateY.value }],
+            color,
+        };
+    }, [animationValue, translateY]);
+
+    const onPressIn = React.useCallback(() => {
+        translateY.value = withTiming(-8, { duration: 250 });
+    }, [translateY]);
+
+    const onPressOut = React.useCallback(() => {
+        translateY.value = withTiming(0, { duration: 250 });
+    }, [translateY]);
+
+    return (
+        <Pressable
+            onPress={onPress}
+            onPressIn={onPressIn}
+            onPressOut={onPressOut}
+        >
+            <Animated.View
+                style={[
+                    {
+                        height: '100%',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    },
+                    containerStyle,
+                ]}
+            >
+                <Animated.Text
+                    style={[{ fontSize: 18, color: '#26292E' }, labelStyle]}
+                >
+                    {label}
+                </Animated.Text>
+            </Animated.View>
+        </Pressable>
+    );
+};

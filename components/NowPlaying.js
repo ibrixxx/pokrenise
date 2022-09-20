@@ -19,7 +19,10 @@ const NowPlaying = () => {
     const navigation = useNavigation()
 
     const onPress = () => {
-        navigation.navigate('AudioPlayer', {pressedSound: null, fromDownloaded: false})
+        if(currPlaylist[currAudioObject].imageUrl)
+            navigation.navigate('AudioPlayer', {pressedSound: null, fromDownloaded: false})
+        else
+            navigation.navigate('AudioPlayer', {pressedSound: null, fromDownloaded: true})
     }
 
     const onPlay = async () => {
