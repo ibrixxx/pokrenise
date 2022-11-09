@@ -19,13 +19,11 @@ import {
     currentAudioObject,
     currentPlaylist, currentStatus, downloadedAudios,
 } from "../atoms/AudioFunctions";
-import {AntDesign, Entypo, Ionicons} from "@expo/vector-icons";
+import {AntDesign} from "@expo/vector-icons";
 import {LinearGradient} from "expo-linear-gradient";
 import LottieView from "lottie-react-native";
 import {fetchDownloaded} from "../utils/fileSystem";
-import { Modalize } from 'react-native-modalize';
 import NowPlaying from "../components/NowPlaying";
-import Carousel from 'react-native-reanimated-carousel';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -35,16 +33,11 @@ import Animated, {
 } from "react-native-reanimated";
 
 
-const PAGE_WIDTH = 60;
-const PAGE_HEIGHT = 40;
-const DATA = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-
 
 export default function AudioScreen({ navigation }) {
     const theme = 'dark'
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
     const { width, height } = useWindowDimensions();
-    const carouselRef = useRef(null)
     const modalizeRef = useRef(null)
 
     const [audio, setAudio] = useState({
@@ -58,7 +51,6 @@ export default function AudioScreen({ navigation }) {
 
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const currAudioInstance = useRecoilValue(currentAudioInstance)
-    const currStatus = useRecoilValue(currentStatus)
     const [currPlaylist, setCurrPlaylist] = useRecoilState(currentPlaylist)
     const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
 
@@ -134,22 +126,11 @@ export default function AudioScreen({ navigation }) {
 
     if (error) return <View style={styles.container}><Text>Error!</Text></View>
 
-    const renderCarousel = item => {
-        return (
-            <View style={{flex: 1, borderRadius: scale(14), overflow: 'hidden', justifyContent: 'center', alignItems: 'center', width: width * 0.5 }}>
-                <TouchableOpacity onPress={() => handleOnPress(item, 0)} style={{height: '100%', width: width * 0.9}}>
-                    <Image source={{uri: item.imageUrl}} resizeMode={'cover'} style={{width: width * 0.9, height: '80%', zIndex: 1}} />
-                    <View style={{width: width * 0.9, height: '20%', backgroundColor: 'whitesmoke', flexDirection: 'row', alignItems: 'center'}}>
-                        <Text style={{color: Colors[theme].primary, fontWeight: 'bold', paddingLeft: scale(20)}}>{item.title}</Text>
-                    </View>
-                </TouchableOpacity>
-            </View>
-        )
-    }
 
     return (
         <SafeAreaView style={{flex: 1, height: '100%', paddingTop: scale(30), backgroundColor: Colors[theme].background}}>
             <ScrollView
+                contentContainerStyle={{flexGrow: 1}}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -181,44 +162,11 @@ export default function AudioScreen({ navigation }) {
                     </TouchableOpacity>
                 </View>
 
-                <View style={{flex: 1, width: width, height: height * 0.081, justifyContent: 'center', alignItems: 'center'}}>
-                    <Carousel
-                        ref={r}
-                        loop={true}
-                        style={{
-                            width: width,
-                            height: PAGE_HEIGHT,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            borderBottomWidth: 1,
-                            borderBottomColor: '#0071fa',
-                        }}
-                        width={PAGE_WIDTH}
-                        height={PAGE_HEIGHT}
-                        data={DATA}
-                        renderItem={({ item, animationValue }) => {
-                            return (
-                                <Item
-                                    animationValue={animationValue}
-                                    label={item}
-                                    onPress={() =>
-                                        r.current?.scrollTo({
-                                            count: animationValue.value,
-                                            animated: true,
-                                        })
-                                    }
-                                />
-                            );
-                        }}
-                        autoPlay={true}
-                    />
-                </View>
-
                 <View style={{width: '100%', height: height * 0.69}}>
-                    <View style={{marginBottom: verticalScale(14)}}>
-                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginTop: verticalScale(22)}}>
+                    <View style={{marginBottom: verticalScale(24)}}>
+                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginTop: verticalScale(22), marginBottom: verticalScale(10)}}>
                             <Title onPress={() => navigation.navigate('Playlist', {title: 'motivakcija', playlist: audio.motivation, refetch, color: Colors[theme].primary, setDownloaded})} colors={['transparent', Colors[theme].primary]}>
-                                motivakcija
+                                Motivakcija
                             </Title>
                         </View>
                         <FlatList
@@ -232,10 +180,10 @@ export default function AudioScreen({ navigation }) {
                         />
                     </View>
 
-                    <View style={{marginBottom: verticalScale(14)}}>
-                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                    <View style={{marginBottom: verticalScale(24)}}>
+                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginBottom: verticalScale(10)}}>
                             <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.music, title: 'muzika', refetch, color: 'dodgerblue', setDownloaded})} colors={['transparent', 'dodgerblue']}>
-                                muzika
+                                Muzika
                             </Title>
                         </View>
                         <FlatList
@@ -249,10 +197,10 @@ export default function AudioScreen({ navigation }) {
                         />
                     </View>
 
-                    <View style={{marginBottom: verticalScale(14)}}>
-                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%'}}>
+                    <View style={{marginBottom: verticalScale(24)}}>
+                        <View style={{width: '100%', justifyContent: 'flex-start', alignItems: 'flex-start', paddingLeft: '5%', marginBottom: verticalScale(10)}}>
                             <Title onPress={() => navigation.navigate('Playlist', {playlist: audio.podcasts, title: 'podcasti', refetch: refetch, color: 'firebrick', setDownloaded})} colors={['transparent', 'firebrick']}>
-                                podcasti
+                                Podcasti
                             </Title>
                         </View>
                         <FlatList
@@ -266,13 +214,6 @@ export default function AudioScreen({ navigation }) {
                         />
                     </View>
                 </View>
-                {/*<Modalize*/}
-                {/*    modalStyle={{height: '20%', width: width}}*/}
-                {/*    ref={modalizeRef}*/}
-                {/*    panGestureEnabled={true}*/}
-                {/*>*/}
-                {/*    */}
-                {/*</Modalize>*/}
             </ScrollView>
             {
                 currAudioInstance !== null && <NowPlaying />

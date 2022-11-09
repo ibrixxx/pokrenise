@@ -11,15 +11,12 @@ import {auth} from "../firebase";
 import ColorPicker from "react-native-wheel-color-picker";
 import EmojiSelector from "react-native-emoji-selector";
 import { updateProfile } from "firebase/auth";
-import {useUser} from "../context/AppContext";
 
 
 const AddUserDetails = ({navigation, route}) => {
     const theme = 'dark'
 
-    const email = route.params.email
     const picker = useRef(null)
-    const user = useUser()
 
     const [nick, setNick] = React.useState("");
     const [emoji, setEmoji] = React.useState('🧠');
@@ -39,6 +36,7 @@ const AddUserDetails = ({navigation, route}) => {
         setSelectedColor(i)
         setVisible(true)
     };
+
     const hideModal = () => {
         setVisible(false);
         setModalColor('#fff')
@@ -77,10 +75,6 @@ const AddUserDetails = ({navigation, route}) => {
     }
 
     const slides = [
-        // {
-        //     id: -1,
-        //     title: "verifikujte uneseni email klikom na link poslat na " + email
-        // },
         {
             id: 0,
             title: "napravite svoj @"

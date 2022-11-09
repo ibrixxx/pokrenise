@@ -63,7 +63,7 @@ export default function ProfileScreen() {
         <View style={styles.container}>
             {
                 user.isLogged ?
-                <View style={{width: '100%', alignItems: 'center', flex: 4, marginTop: verticalScale(30), borderRadius: scale(12), elevation: 12, shadowColor: 'white', padding: scale(22)}}>
+                <View style={{width: '100%', alignItems: 'center', flex: 4, marginTop: verticalScale(30), borderRadius: scale(12), elevation: 2, shadowColor: 'white', padding: scale(22), backgroundColor: 'rgba(2,2,2,0.15)'}}>
                     <View style={styles.profileOutline}>
                         <LinearGradient
                             colors={getGradient()}

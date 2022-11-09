@@ -62,7 +62,7 @@ const NowPlaying = () => {
     return (
         <Pressable style={styles.card} onPress={onPress}>
             <Image source={getImageSource()} style={{width: scale(55), height: '100%'}} resizeMode={'cover'} />
-            <View style={{width: scale(175), alignItems: 'center', backgroundColor: '#3d3604'}}>
+            <View style={{width: scale(175), alignItems: 'center', backgroundColor: '#2e0603'}}>
                 <TextTicker
                     style={{ fontSize: 14, color: 'white', fontWeight: 'bold'}}
                     useNativeDriver={true}
@@ -77,7 +77,7 @@ const NowPlaying = () => {
                 <TouchableOpacity style={{marginRight: scale(10)}} onPress={onToggle}>
                     <Entypo name={currStatus?.isPlaying? "controller-paus":"controller-play"} size={30} color={Colors[theme].primary} />
                 </TouchableOpacity>
-                <AntDesign name="close" size={24} color="gray" onPress={onClose} />
+                <AntDesign name="close" size={30} color="gray" onPress={onClose} />
             </View>
         </Pressable>
     )
@@ -86,7 +86,7 @@ const NowPlaying = () => {
 const styles = StyleSheet.create({
     card: {
         height: '8%',
-        backgroundColor: '#3d3604',
+        backgroundColor: '#2e0603',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexDirection: 'row',
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#3d3604'
+        backgroundColor: '#2e0603'
     }
 });
 

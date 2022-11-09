@@ -360,7 +360,7 @@ export default function AudioPlayerScreen({route}) {
                     onSlidingComplete={(value) =>  onSliderEnd(value)}
                 />
                 <View style={{flexDirection: 'row', justifyContent: 'space-between', marginTop: verticalScale(-10)}}>
-                    <Text style={{color: Colors[theme].tabIconDefault, fontSize: 11}}>{currStatus?.isBuffering && 'loading...'}</Text>
+                    <Text style={{color: Colors[theme].tabIconDefault, fontSize: 11}}>{currStatus?.isBuffering && ''}</Text>
                     {
                         currStatus?.didJustFinish?
                         <MaterialIcons onPress={onReplay} name="replay-circle-filled" size={24} color={Colors[theme].tabIconDefault} />

@@ -3,7 +3,7 @@ import Navigation from "./navigation";
 import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
 import useCachedResources from "./hooks/useCachedResources";
 import ContextProvider from "./context/AppContext";
-import {RecoilRoot, useRecoilState} from "recoil";
+import {RecoilRoot} from "recoil";
 import {useEffect} from "react";
 import {Audio, InterruptionModeAndroid, InterruptionModeIOS} from "expo-av";
 import Colors from "./constants/Colors";
