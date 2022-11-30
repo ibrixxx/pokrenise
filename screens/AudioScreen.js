@@ -85,17 +85,16 @@ export default function AudioScreen({ navigation }) {
     }, [data])
 
     const handleOnPress = async (sound, index) => {
-        if(index === 0)
-            setCurrPlaylist([sound])
-        else {
+        if(currPlaylist === [] || currPlaylist[0]?.type !== sound.type)
             if (sound.type === 'muzika') {
-                await setCurrPlaylist(audio.music)
-            } else if (sound.type === 'podcast') {
-                await setCurrPlaylist(audio.podcasts)
-            } else {
-                await setCurrPlaylist(audio.motivation)
+                setCurrPlaylist(audio.music)
             }
-        }
+            else if (sound.type === 'podcast') {
+                setCurrPlaylist(audio.podcasts)
+            }
+            else if (sound.type === 'motivakcija'){
+                setCurrPlaylist(audio.motivation)
+            }
         if(currAudioInstance !== null && sound.audioUrl === currPlaylist[currAudioObject]?.audioUrl) {
             navigation.navigate('AudioPlayer', {pressedSound: null, fromDownloaded: false})
         }

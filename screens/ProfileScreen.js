@@ -9,6 +9,7 @@ import {auth} from "../firebase";
 import {useUser, useUserUpdate} from "../context/AppContext";
 import {useNavigation} from "@react-navigation/native";
 import {LinearGradient} from "expo-linear-gradient";
+import CardView from "../components/CardView";
 
 
 export default function ProfileScreen() {
@@ -59,60 +60,63 @@ export default function ProfileScreen() {
         return arr.slice(0, arr.length-1)
     }
 
+    if(user.isLogged)
+        return (
+            <View style={styles.container}>
+                <CardView children={
+                    <>
+                        <View style={styles.profileOutline}>
+                            <LinearGradient
+                                colors={getGradient()}
+                                style={styles.profileBackground}
+                            >
+                                <Text style={{fontSize: scale(55)}}>{auth.currentUser.photoURL?.split(',').pop()}</Text>
+                            </LinearGradient>
+                        </View>
+                        <Title style={[styles.title2, {color: Colors[theme].text, width: '100%', fontSize: scale(27)}]}>@{auth.currentUser.displayName}</Title>
+                        <Button onPress={() => auth.signOut()} uppercase={false} style={styles.button} mode="outlined" color={Colors[theme].primary}>
+                            <Text style={[styles.title, {color: 'firebrick'}]}>odjavi se</Text>
+                        </Button>
+                    </>
+                }
+                />
+            </View>
+        )
+
     return (
         <View style={styles.container}>
-            {
-                user.isLogged ?
-                <View style={{width: '100%', alignItems: 'center', flex: 4, marginTop: verticalScale(30), borderRadius: scale(12), elevation: 2, shadowColor: 'white', padding: scale(22), backgroundColor: 'rgba(2,2,2,0.15)'}}>
-                    <View style={styles.profileOutline}>
-                        <LinearGradient
-                            colors={getGradient()}
-                            style={styles.profileBackground}
-                        >
-                            <Text style={{fontSize: scale(55)}}>{auth.currentUser.photoURL?.split(',').pop()}</Text>
-                        </LinearGradient>
-                    </View>
-                    <Title style={[styles.title2, {color: Colors[theme].text, width: '100%', fontSize: scale(27)}]}>@{auth.currentUser.displayName}</Title>
-                    <Button onPress={() => auth.signOut()} uppercase={false} style={styles.button} mode="outlined" color={Colors[theme].primary}>
-                        <Text style={[styles.title, {color: 'firebrick'}]}>odjavi se</Text>
-                    </Button>
-                </View>
-                    :
-                <>
-                    <View style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
-                        <Image source={require('../assets/images/loginLogo.png')} style={{width: scale(156), height: scale(156)}} />
-                    </View>
-                    <TextInput
-                        autoCapitalize={'none'}
-                        mode={'outlined'}
-                        style={[styles.input, {backgroundColor: Colors[theme].background}]}
-                        label="email"
-                        value={email}
-                        activeOutlineColor={Colors[theme].primary}
-                        outlineColor={Colors[theme].tabIconDefault}
-                        onChangeText={text => setEmail(text)}
-                        theme={{colors: {text: Colors[theme].text, placeholder: Colors[theme].tabIconDefault}}}
-                    />
-                    <TextInput
-                        autoCapitalize={'none'}
-                        mode={'outlined'}
-                        style={[styles.input, {marginBottom: verticalScale(10), backgroundColor: Colors[theme].background}]}
-                        label="password"
-                        value={password}
-                        activeOutlineColor={Colors[theme].primary}
-                        outlineColor={Colors[theme].tabIconDefault}
-                        onChangeText={text => setPassword(text)}
-                        secureTextEntry={true}
-                        theme={{colors: {text: Colors[theme].text, placeholder: Colors[theme].tabIconDefault}}}
-                    />
-                    <Button uppercase={false} style={styles.button} mode="contained" color={Colors[theme].primary} onPress={onLogin}>
-                        <Text style={[styles.title, {color: Colors[theme].text}]}>prijavi se</Text>
-                    </Button>
-                    <Button uppercase={false} style={[styles.button, {borderColor: Colors[theme].primary, borderWidth: scale(1.5)}]} mode="outlined" color={Colors[theme].primary} onPress={onRegister}>
-                        <Text style={[styles.title, {color: Colors[theme].primary}]}>registruj se</Text>
-                    </Button>
-                </>
-            }
+            <View style={{width: '100%', justifyContent: 'center', alignItems: 'center'}}>
+                <Image source={require('../assets/images/loginLogo.png')} style={{width: scale(156), height: scale(156)}} />
+            </View>
+            <TextInput
+                autoCapitalize={'none'}
+                mode={'outlined'}
+                style={[styles.input, {backgroundColor: Colors[theme].background}]}
+                label="email"
+                value={email}
+                activeOutlineColor={Colors[theme].primary}
+                outlineColor={Colors[theme].tabIconDefault}
+                onChangeText={text => setEmail(text)}
+                theme={{colors: {text: Colors[theme].text, placeholder: Colors[theme].tabIconDefault}}}
+            />
+            <TextInput
+                autoCapitalize={'none'}
+                mode={'outlined'}
+                style={[styles.input, {marginBottom: verticalScale(10), backgroundColor: Colors[theme].background}]}
+                label="password"
+                value={password}
+                activeOutlineColor={Colors[theme].primary}
+                outlineColor={Colors[theme].tabIconDefault}
+                onChangeText={text => setPassword(text)}
+                secureTextEntry={true}
+                theme={{colors: {text: Colors[theme].text, placeholder: Colors[theme].tabIconDefault}}}
+            />
+            <Button uppercase={false} style={styles.button} mode="contained" color={Colors[theme].primary} onPress={onLogin}>
+                <Text style={[styles.title, {color: Colors[theme].text}]}>prijavi se</Text>
+            </Button>
+            <Button uppercase={false} style={[styles.button, {borderColor: Colors[theme].primary, borderWidth: scale(1.5)}]} mode="outlined" color={Colors[theme].primary} onPress={onRegister}>
+                <Text style={[styles.title, {color: Colors[theme].primary}]}>registruj se</Text>
+            </Button>
         </View>
     )
 }

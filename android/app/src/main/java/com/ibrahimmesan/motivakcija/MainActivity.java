@@ -1,5 +1,8 @@
 package com.ibrahimmesan.motivakcija;
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -10,11 +13,16 @@ import com.facebook.react.ReactRootView;
 import expo.modules.ReactActivityDelegateWrapper;
 
 public class MainActivity extends ReactActivity {
+  private SensorManager sensorManager;
+  private Sensor sensor;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     // Set the theme to AppTheme BEFORE onCreate to support 
     // coloring the background, status bar, and navigation bar.
     // This is required for expo-splash-screen.
+    sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+    sensor = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
     setTheme(R.style.AppTheme);
     super.onCreate(null);
   }
