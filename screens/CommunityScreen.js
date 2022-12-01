@@ -7,14 +7,37 @@ import CircularProgress from "react-native-circular-progress-indicator";
 import {FontAwesome5, MaterialCommunityIcons} from "@expo/vector-icons";
 import CardView from "../components/CardView";
 import {Caption, DataTable, Title} from "react-native-paper";
+import {HealthKitDataType} from "@kilohealth/rn-fitness-tracker/src/enums/healthKitDataType";
+import {GoogleFitDataType} from "@kilohealth/rn-fitness-tracker/src/enums/googleFitDataType";
+import {FitnessTracker, GoogleFit} from "@kilohealth/rn-fitness-tracker/src/api";
+import {FitnessDataType} from "@kilohealth/rn-fitness-tracker/src/types/fitnessTypes";
+
+const permissions = {
+    healthReadPermissions: [HealthKitDataType.StepCount],
+    googleFitReadPermissions: [GoogleFitDataType.Steps],
+};
 
 export default function CommunityScreen() {
     const theme = 'dark'
 
     const [currentStepsCount, setCurrentStepsCount] = useState(0)
+    const distance = (currentStepsCount/1408).toFixed(1)
+    const kcal = (currentStepsCount*0.03).toFixed(0)
 
     useEffect(() => {
-
+        const getStepsToday = async () => {
+            const authorized = await GoogleFit.authorize([GoogleFitDataType.Steps], [GoogleFitDataType.Steps]);
+            console.log(authorized)
+            if (!authorized) return;
+            const stepsToday = await GoogleFit.getStatisticTodayTotal(
+                FitnessDataType.Steps,
+            );
+            console.log(stepsToday);
+            setCurrentStepsCount(stepsToday);
+        };
+        GoogleFit.isTrackingAvailable([GoogleFitDataType.Steps], [GoogleFitDataType.Steps])
+            .then(() => getStepsToday().catch(e => console.log('e ', e)))
+            .catch(e => console.log('er ', e))
         }, []
     )
 
@@ -25,7 +48,8 @@ export default function CommunityScreen() {
                 children={
                 <>
                     <CircularProgress
-                        value={30}
+                        value={currentStepsCount}
+                        maxValue={10000}
                         radius={verticalScale(80)}
                         progressValueColor={'#ecf0f1'}
                         activeStrokeColor={Colors[theme].primary}
@@ -42,14 +66,14 @@ export default function CommunityScreen() {
                                 <MaterialCommunityIcons name="map-marker-distance" size={26} color="white" />
                                 <Caption>km</Caption>
                             </View>
-                            <Title>9.5</Title>
+                            <Title>{distance}</Title>
                         </View>
                         <View style={{flexDirection: 'row'}}>
                             <View style={{justifyContent: 'center', alignItems: 'center', marginRight: scale(10)}}>
                                 <FontAwesome5 name="fire-alt" size={24} color="white" />
                                 <Caption>kcal</Caption>
                             </View>
-                            <Title>2002</Title>
+                            <Title>{kcal}</Title>
                         </View>
                     </View>
                 </>
