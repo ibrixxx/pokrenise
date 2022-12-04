@@ -51,6 +51,10 @@ export const downloadedAudios = atom({
     default: {}
 })
 
+export const likedAudios = atom({
+    key: 'likedAudios',
+    default: {}
+})
 
 
 

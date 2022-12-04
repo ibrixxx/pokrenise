@@ -17,7 +17,7 @@ import {useRecoilState, useRecoilValue} from "recoil";
 import {
     currentAudioInstance,
     currentAudioObject,
-    currentPlaylist, currentStatus, downloadedAudios,
+    currentPlaylist, currentStatus, database, downloadedAudios,
 } from "../atoms/AudioFunctions";
 import {AntDesign} from "@expo/vector-icons";
 import {LinearGradient} from "expo-linear-gradient";
@@ -31,7 +31,7 @@ import Animated, {
     withTiming,
     Extrapolate, interpolateColor
 } from "react-native-reanimated";
-
+import {useUser} from "../context/AppContext";
 
 
 export default function AudioScreen({ navigation }) {
@@ -39,6 +39,7 @@ export default function AudioScreen({ navigation }) {
     const [{ data, loading, error }, refetch] = useAxios(getAudio)
     const { width, height } = useWindowDimensions();
     const modalizeRef = useRef(null)
+    const user = useUser()
 
     const [audio, setAudio] = useState({
         music: [],
@@ -47,12 +48,12 @@ export default function AudioScreen({ navigation }) {
     })
     const [refreshing, setRefreshing] = React.useState(false);
     const [isReady, setIsReady] = React.useState(false);
-    const r = React.useRef(null);
 
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
     const currAudioInstance = useRecoilValue(currentAudioInstance)
     const [currPlaylist, setCurrPlaylist] = useRecoilState(currentPlaylist)
     const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
+
 
     useEffect(() => {
         fetchDownloaded(setDownloaded).then(() => {
@@ -149,7 +150,7 @@ export default function AudioScreen({ navigation }) {
                             <Text style={[styles.playlistText, {color: Colors[theme].primary}]}>skinuto</Text>
                         </LinearGradient>
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
+                    <TouchableOpacity onPress={() => navigation.navigate('Liked')} style={[styles.playlistButton, {borderColor: Colors[theme].primary}]}>
                         <LinearGradient
                             colors={[Colors[theme].primary, 'white']}
                             style={styles.playlistGradient}

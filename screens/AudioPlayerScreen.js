@@ -14,7 +14,7 @@ import {
     currentAudioObject,
     currentAudioInstance,
     currentStatus,
-    currentPlaylist, downloadedAudios
+    currentPlaylist, downloadedAudios, database
 } from "../atoms/AudioFunctions";
 import {useRecoilState, useRecoilValue} from "recoil";
 import {playbackOptions} from "../utils/playbackOptions";
@@ -22,13 +22,15 @@ import {_getMMSSFromMillis} from "../utils/millisecondFormater";
 import {Audio} from "expo-av";
 import LottieView from 'lottie-react-native';
 import {fetchDownloaded} from "../utils/fileSystem";
-
+import {useUser} from "../context/AppContext";
+import { doc, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
 
 export default function AudioPlayerScreen({route}) {
     const theme = 'dark' //useColorScheme()
     const navigation = useNavigation()
-    const { pressedSound, fromDownloaded } = route.params
+    const { pressedSound, fromDownloaded, isLiked } = route.params
     const animation = useRef(null);
+    const user = useUser()
 
     const [currPlaybackOption, setCurrPlaybackOption] = useRecoilState(currentPlaybackOption)
     const [currAudioObject, setCurrAudioObject] = useRecoilState(currentAudioObject)
@@ -36,8 +38,9 @@ export default function AudioPlayerScreen({route}) {
     const [currStatus, setCurrStatus] = useRecoilState(currentStatus)
     const [downloaded, setDownloaded] = useRecoilState(downloadedAudios)
     const currPlaylist = useRecoilValue(currentPlaylist)
+    const db = useRecoilValue(database)
 
-    const [liked, setLiked] = useState(false)
+    const [liked, setLiked] = useState(isLiked)
     const [speed, setSpeed] = useState(1.0)
     const [desc, setDesc] = useState(false)
     const [isSeeking, setIsSeeking] = useState(null)
@@ -257,6 +260,42 @@ export default function AudioPlayerScreen({route}) {
         }
     }
 
+    const onLiked = async () => {
+        // console.log(user)
+        if(!user.localId) {
+            navigation.navigate('Profile')
+            return
+        }
+        setLiked(!liked)
+        if(!liked) {
+            if(!doc(db, "users", user.localId))
+                try {
+                    await setDoc(doc(db, "users", user.localId), {
+                        liked: [currPlaylist[currAudioObject]._id]
+                    });
+                } catch (e) {
+                    console.error("Error updating document: ", e);
+                }
+            else
+                try {
+                    await updateDoc(doc(db, "users", user.localId), {
+                        liked: arrayUnion(currPlaylist[currAudioObject]._id)
+                    });
+                } catch (e) {
+                    console.error("Error updating document: ", e);
+                }
+        }
+        else {
+            try {
+                await updateDoc(doc(db, "users", user.localId), {
+                    liked: arrayRemove(currPlaylist[currAudioObject]._id)
+                });
+            } catch (e) {
+                console.error("Error updating document: ", e);
+            }
+        }
+    }
+
     const onDownload = async () => {
         await setDownloading({animation: true, failed: 'w'})
         FileSystem.downloadAsync(
@@ -344,7 +383,7 @@ export default function AudioPlayerScreen({route}) {
                     <MaterialCommunityIcons name="play-speed" size={24} color={Colors[theme].tabIconDefault} />
                     <Text style={{color: Colors[theme].tabIconDefault, fontSize: 11}}>{speed.toString()}x</Text>
                 </Pressable>
-                <AntDesign onPress={() => setLiked(!liked)} name={liked? "heart":"hearto"} size={24} color={liked? Colors[theme].primary:Colors[theme].tabIconDefault} />
+                <AntDesign onPress={() => onLiked()} name={liked? "heart":"hearto"} size={24} color={liked? Colors[theme].primary:Colors[theme].tabIconDefault} />
                 {
                     showPlaybackIcon()
                 }

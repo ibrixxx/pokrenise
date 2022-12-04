@@ -1,5 +1,5 @@
 import {Dimensions, ScrollView, StyleSheet, View} from 'react-native';
-import { useEffect, useState } from "react";
+import {useCallback, useEffect, useState} from "react";
 const { width } = Dimensions.get("screen");
 import {scale, verticalScale} from "react-native-size-matters";
 import Colors from "../constants/Colors";
@@ -7,15 +7,17 @@ import CircularProgress from "react-native-circular-progress-indicator";
 import {FontAwesome5, MaterialCommunityIcons} from "@expo/vector-icons";
 import CardView from "../components/CardView";
 import {Caption, DataTable, Title} from "react-native-paper";
-import {HealthKitDataType} from "@kilohealth/rn-fitness-tracker/src/enums/healthKitDataType";
+// import {HealthKitDataType} from "@kilohealth/rn-fitness-tracker/src/enums/healthKitDataType";
 import {GoogleFitDataType} from "@kilohealth/rn-fitness-tracker/src/enums/googleFitDataType";
-import {FitnessTracker, GoogleFit} from "@kilohealth/rn-fitness-tracker/src/api";
+// import {FitnessTracker, GoogleFit} from "@kilohealth/rn-fitness-tracker/src/api";
 import {FitnessDataType} from "@kilohealth/rn-fitness-tracker/src/types/fitnessTypes";
+import {useFocusEffect} from "@react-navigation/native";
+import {GoogleFit} from "@kilohealth/rn-fitness-tracker/src/api";
 
-const permissions = {
-    healthReadPermissions: [HealthKitDataType.StepCount],
-    googleFitReadPermissions: [GoogleFitDataType.Steps],
-};
+// const permissions = {
+//     healthReadPermissions: [HealthKitDataType.StepCount],
+//     googleFitReadPermissions: [GoogleFitDataType.Steps],
+// };
 
 export default function CommunityScreen() {
     const theme = 'dark'
@@ -24,21 +26,23 @@ export default function CommunityScreen() {
     const distance = (currentStepsCount/1408).toFixed(1)
     const kcal = (currentStepsCount*0.03).toFixed(0)
 
-    useEffect(() => {
-        const getStepsToday = async () => {
-            const authorized = await GoogleFit.authorize([GoogleFitDataType.Steps], [GoogleFitDataType.Steps]);
-            console.log(authorized)
-            if (!authorized) return;
-            const stepsToday = await GoogleFit.getStatisticTodayTotal(
-                FitnessDataType.Steps,
-            );
-            console.log(stepsToday);
-            setCurrentStepsCount(stepsToday);
-        };
-        GoogleFit.isTrackingAvailable([GoogleFitDataType.Steps], [GoogleFitDataType.Steps])
-            .then(() => getStepsToday().catch(e => console.log('e ', e)))
-            .catch(e => console.log('er ', e))
-        }, []
+    useFocusEffect(
+        useCallback(() => {
+            const getStepsToday = async () => {
+                const authorized = await GoogleFit.authorize([GoogleFitDataType.Steps], [GoogleFitDataType.Steps]);
+                console.log(authorized)
+                if (!authorized) return;
+                const stepsToday = await GoogleFit.getStatisticTodayTotal(
+                    FitnessDataType.Steps,
+                );
+                console.log(stepsToday);
+                setCurrentStepsCount(stepsToday);
+            };
+            GoogleFit.isTrackingAvailable([GoogleFitDataType.Steps], [GoogleFitDataType.Steps])
+                .then(() => getStepsToday().catch(e => console.log('e ', e)))
+                .catch(e => console.log('er ', e))
+            }, []
+        )
     )
 
     return (

@@ -23,13 +23,10 @@ export default function ProfileScreen() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                setUserData(user)
-            }
-            else {
+            if(user)
+                setUserData(user.reloadUserInfo)
+            else
                 setUserData()
-            }
-
         })
         return unsubscribe
     }, [])
